@@ -1,0 +1,9 @@
+/.dapper
+/.cache
+/bin
+/dist
+*.swp
+.idea
+/Rancher-Plugin-gMSA
+.vscode/
+.DS_Store

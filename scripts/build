@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+mkdir -p bin
+
+if [ -n "${DEBUG}" ]; then
+  GCFLAGS="-N -l"
+fi
+
+LINKFLAGS="-X github.com/rancher/Rancher-Plugin-gMSA/pkg/version.Version=$VERSION"
+LINKFLAGS="-X github.com/rancher/Rancher-Plugin-gMSA/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
+if [ -z "${DEBUG}" ]; then
+  LINKFLAGS="-s -w $LINKFLAGS"
+fi
+OTHER_LINKFLAGS="-extldflags -static"
+
+# function build-binaries() {
+#     printf "Building for ${1}-${2} ...\n"
+#     TEMP_LINKFLAGS=$LINKFLAGS
+#     if [ $1 = "linux" ]; then
+#         TEMP_LINKFLAGS="$LINKFLAGS $OTHER_LINKFLAGS"
+#     fi
+#     TEMP_SUFFIX=""
+#     if [ $1 = "windows" ]; then
+#         TEMP_SUFFIX=".exe"
+#     fi
+#     GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/ccg-plugin-manager-${1}-${2}${TEMP_SUFFIX} ./cmd/ccg-plugin-manager
+#     GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/gmsa-account-provider-${1}-${2}${TEMP_SUFFIX} ./cmd/gmsa-account-provider
+# }
+
+# if [ "$CROSS" = "true" ]; then
+#     # If local (host) is unset, we default to false since we are already cross-compiling for all platforms.
+#     if [ -z "$LOCAL" ]; then
+#         LOCAL="false"
+#     fi
+#     OS_ARCH=( "linux amd64" "linux arm64" "darwin amd64" "darwin arm64" "windows amd64")
+#     for i in "${OS_ARCH[@]}"; do
+#         set -- $i
+#         build-binaries ${1} ${2}
+#     done
+# elif [ "$CROSS" = "windows" ]; then
+#    build-binaries "windows" "amd64"
+# fi
+
+# # Always build for the host (local) OS and ARCH unless otherwise specified (setting LOCAL to "false").
+# # LOCAL will be set to "false" if CROSS is "true" (avoids compiling the host OS and ARCH twice).
+# if ! [ "$LOCAL" = "false" ]; then
+#     build-binaries ${OS} ${ARCH}
+# fi
+
