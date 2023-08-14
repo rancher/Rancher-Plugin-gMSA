@@ -1,8 +1,17 @@
-FROM registry.suse.com/bci/bci-micro:15.4.17.1
+FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION} as runtime
+FROM registry.suse.com/bci/bci-micro:15.4.17.1 as builder
+
 RUN echo 'helmlocker:x:1000:1000::/home/helmlocker:/bin/bash' >> /etc/passwd && \
     echo 'helmlocker:x:1000:' >> /etc/group && \
     mkdir /home/helmlocker && \
-    chown -R helmlocker:helmlocker /home/helmlocker
+    chown -R helmlocker:helmlocker /home/helmlocker \
+
 COPY bin/Rancher-Plugin-gMSA /usr/bin/
 USER helmlocker
-CMD ["Rancher-Plugin-gMSA"]
+
+FROM runtime
+
+# two stages are needed to properly package windows host process containers
+COPY --from=builder /usr/bin/main.exe .
+
+ENTRYPOINT ["main.exe"]
