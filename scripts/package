@@ -6,13 +6,32 @@ source $(dirname $0)/version
 cd $(dirname $0)/..
 
 mkdir -p dist/artifacts
-cp bin/Rancher-Plugin-gMSA dist/artifacts/Rancher-Plugin-gMSA${SUFFIX}
+cp bin/* dist/artifacts
 
-IMAGE=${REPO}/Rancher-Plugin-gMSA:${TAG}
-DOCKERFILE=package/Dockerfile
-if [ -e ${DOCKERFILE}.${ARCH} ]; then
-    DOCKERFILE=${DOCKERFILE}.${ARCH}
+IMAGES=("gmsa-account-provider" "ccg-plugin-installer")
+NANOSERVER_VERSIONS=("ltsc2019" "ltsc2022")
+
+TEMP_DOCKER_SUFFIX=""
+if [ "$OS" = "windows" ]; then
+  TEMP_DOCKER_SUFFIX=".windows"
 fi
 
-docker build -f ${DOCKERFILE} -t ${IMAGE} .
-echo Built ${IMAGE}
+for i in "${IMAGES[@]}"; do
+  IMAGE=${REPO}/"$i":${TAG}
+  DOCKERFILE="package/$i/Dockerfile${TEMP_DOCKER_SUFFIX}"
+
+  if [ "$OS" = "windows" ]; then
+      for v in "${NANOSERVER_VERSIONS[@]}"; do
+        # append the nano-server version to the image tag
+          IMAGE=${REPO}/"$i":${TAG}-${v}
+        docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE}  .
+        echo Built ${IMAGE} for nanoserver version ${v}
+      done
+    else
+      # don't try to build if the file doesn't exist
+      if [ -f ${DOCKERFILE} ]; then
+        docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}"  -f ${DOCKERFILE} -t ${IMAGE} .
+        echo Built ${IMAGE}
+      fi
+  fi
+done

@@ -1,6 +1,8 @@
 ARG NANOSERVER_VERSION
 FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION}
+ARG OS
+ARG ARCH
 
-COPY bin/ccg-plugin-manager-windows-amd64.exe ./
+COPY dist/artifacts/ccg-plugin-manager-${OS}-${ARCH}.exe ./main.exe
 
-ENTRYPOINT ["ccg-plugin-manager-windows-amd64.exe"]
+ENTRYPOINT ["main.exe"]

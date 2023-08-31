@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# This is a utility script for building the plugin DLL. This script should not be run in CI, we expect the plugin DLL to be manually built before you commit your changes.
+# In cases where all changes are localized to go files, this script does not need to be run.
+# This script must be run on a Windows host, since we are building a DLL using .NET Framework
+# If we migrate the CCG plugin to pure golang, we can remove this script.
+
+set -e
+
+source $(dirname $0)/version
+
+cd $(dirname $0)/..
+
+function build-dll() {
+  # can't build windows containers on linux/mac
+  if ! [ ${1} = "windows" ] && ! [ ${1} = "Windows_NT" ]; then
+    return 0
+  fi
+
+  # build the DLL in a container so we don't have to install .NET SDK's on the runner
+  docker build -f package/ccg-plugin-installer/Dockerfile.builder.windows -t rancher/gmsa-ccg-plugin-builder  .
+  docker create --name dllbuild rancher/gmsa-ccg-plugin-builder:latest
+
+  # cp the resulting artifact into the manager directory so we can embed the file on build
+  docker cp dllbuild:/app/bin/Debug/RanchergMSACredentialProvider.dll pkg/plugin/manager/RanchergMSACredentialProvider.dll
+
+  # clean up the container
+  docker rm dllbuild
+}
+
+build-dll ${OS}
