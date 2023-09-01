@@ -13,14 +13,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type HttpServer struct {
+type HTTPServer struct {
 	Engine      *gin.Engine
 	Credentials *CredentialClient
 }
 
-func (h *HttpServer) StartServer(errChan chan error, namespace string, debug bool) (string, error) {
-	h.Engine.GET("/provider", h.handle)
-
+func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMTLS bool) (string, error) {
 	// use a host allocated port
 	ln, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -32,7 +30,7 @@ func (h *HttpServer) StartServer(errChan chan error, namespace string, debug boo
 			Handler: h.Engine,
 		}
 
-		if debug {
+		if disableMTLS {
 			err = s.Serve(ln)
 		} else {
 			s.TLSConfig = &tls.Config{
@@ -56,13 +54,13 @@ func (h *HttpServer) StartServer(errChan chan error, namespace string, debug boo
 	return port, nil
 }
 
-func NewGinServer(h *HttpServer) *gin.Engine {
+func NewGinServer(h *HTTPServer) *gin.Engine {
 	e := gin.Default()
 	e.GET("/provider", h.handle)
 	return e
 }
 
-func (h *HttpServer) handle(c *gin.Context) {
+func (h *HTTPServer) handle(c *gin.Context) {
 	secret := c.GetHeader("object")
 	if secret == "" {
 		c.Status(http.StatusBadRequest)
@@ -71,9 +69,9 @@ func (h *HttpServer) handle(c *gin.Context) {
 	}
 
 	s, err := h.Credentials.Secrets.Get(c.GetHeader("object"), metav1.GetOptions{})
+	// Handle forbidden requests in the same manner as 404's so no feedback is given to the caller
 	if errors.IsForbidden(err) || errors.IsNotFound(err) {
 		c.Status(http.StatusNotFound)
-		logrus.Info(err)
 		return
 	}
 

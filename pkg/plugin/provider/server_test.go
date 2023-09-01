@@ -14,10 +14,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var mockServ *HttpServer
+var mockServ *HTTPServer
 
 func TestMain(m *testing.M) {
-	mockServ = &HttpServer{
+	mockServ = &HTTPServer{
 		Credentials: &CredentialClient{
 			Secrets: createMockClient(),
 		},

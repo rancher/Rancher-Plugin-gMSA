@@ -3,4 +3,5 @@ FROM mcr.microsoft.com/dotnet/framework/sdk:4.8.1 as csharp-build-env
 WORKDIR /app
 COPY ./src/* ./
 
+# The resulting dll is '/app/bin/Debug/RanchergMSACredentialProvider.dll'
 RUN dotnet build
