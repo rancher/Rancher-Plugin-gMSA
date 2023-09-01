@@ -1,0 +1,87 @@
+{{ template "cert-manager.apiversion" . }}
+kind: Issuer
+metadata:
+  name: {{ .Release.Name }}-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "gmsa.chartref" . | nindent 4 }}
+spec:
+  selfSigned: {}
+
+---
+
+{{ template "cert-manager.apiversion" . }}
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-root-cert
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "gmsa.chartref" . | nindent 4 }}
+spec:
+  isCA: true
+  secretName: {{ .Release.Name }}-root-cert
+  commonName: {{.Release.Name}}-gMSA-Root-Certificate
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    encoding: PKCS8
+  issuerRef:
+    name: {{ .Release.Name }}-bootstrap
+    kind: Issuer
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ .Release.Name }}-root-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  subject:
+    organizations:
+      - rancher-gmsa-{{ .Release.Name }}
+  ca:
+    secretName: {{ .Release.Name }}-root-cert
+
+---
+
+{{ template "cert-manager.apiversion" . }}
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-provider-cert
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "gmsa.chartref" . | nindent 4 }}
+spec:
+  subject:
+    organizations:
+      - rancher-gmsa-{{ .Release.Name }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - https://localhost
+    - localhost
+  issuerRef:
+    kind: Issuer
+    name: {{ .Release.Name }}-root-issuer
+  secretName: {{ .Values.certificates.serverSecretName }}
+---
+
+{{ template "cert-manager.apiversion" . }}
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-client-cert
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "gmsa.chartref" . | nindent 4 }}
+spec:
+  subject:
+    organizations:
+      - rancher-gmsa-{{ .Release.Name }}
+  dnsNames:
+    - https://localhost
+    - localhost
+  usages:
+    - server auth
+    - client auth
+  issuerRef:
+    kind: Issuer
+    name: {{ .Release.Name }}-root-issuer
+  secretName: {{ .Values.certificates.clientSecretName }}
