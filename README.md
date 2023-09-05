@@ -1,5 +1,6 @@
 Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin)
 ========
+##### Current Status: **Experimental**
 
 The Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin) retrieves group managed service account (gMSA) credentials stored on a Kubernetes cluster to facilitate the domain-joined process.
 
@@ -21,7 +22,7 @@ These gMSA credentials can be used in a multitude of ways, including using them 
 
 It relies on each host being configured with an [Azure Managed Identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) so that the host can be trusted to retrieve domain credentials from [Azure Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/basic-concepts).
 
-If you are looking for a way to deploy gMSA workloads on AKS or Azure, it might be a better idea to use the CCGAKV plugin.
+If you are looking for a way to deploy gMSA workloads on AKS or Azure, it might be more convenient to use the official CCGAKV plugin which comes preinstalled onto all Windows nodes.
 
 However, if you are looking for a way to deploy gMSA workloads in a **Kubernetes-native** way (with no dependency on an infrastructure provider), this is a good solution to use.
 
@@ -39,7 +40,11 @@ On a high-level, all CCG Plugins take the following steps on a container being s
 
 5. The container runtime injects the credentials from `ccg.exe` into the container, which allows the application to use it
 
-The Rancher plugin follows the same process as above by storing the connection details in **files mounted on the host** that the DLL has access to and creating an **Account Provider** HostProcess on each Windows host to represent the secret store.
+The Rancher plugin follows the same process as above by storing the connection details in **Kubernetes secrets** that the CCG Plugin has access to via an **Account Provider API**, which runs as a `HostProcess` on each Windows host and represents the "secret store".
+
+
+![](./docs/diagrams/simple-diagram.png)
+
 
 ## Getting Started
 
@@ -52,7 +57,7 @@ For more information, see the [Getting Started guide](docs/gettingstarted.md).
 This repository is built and released off the contents of the `main` branch. To make a contribution, open up a PR to the `main` branch.
 
 ## License
-Copyright (c) 2020 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2023 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
