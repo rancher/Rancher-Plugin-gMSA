@@ -1,0 +1,63 @@
+apiVersion: v1
+entries:
+  rancher-gmsa-account-provider:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Rancher gMSA Account Provider
+      catalog.cattle.io/experimental: "true"
+      catalog.cattle.io/kube-version: '>=1.24.0-0'
+      catalog.cattle.io/os: windows
+      catalog.cattle.io/permits-os: windows
+      catalog.cattle.io/rancher-version: '>=2.7.0-0'
+    apiVersion: v2
+    created: "2023-09-01T14:17:00.20772-04:00"
+    description: The Rancher gMSA Account Provider assists the Rancher gMSA CCG Plugin
+      during the non-domain-joined gMSA authorization process
+    digest: 2244f3428b6ad7f084ad9fcd00d2206899d9ad0b1e43a560c4a55674513e1471
+    icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
+    keywords:
+    - Windows
+    - Windows GMSA
+    - GMSA
+    - Active Directory
+    maintainers:
+    - email: harrison.affel@gmail.com
+      name: Harrison
+    - email: arvindiyengar@suse.com
+      name: Arvind
+    name: rancher-gmsa-account-provider
+    type: application
+    urls:
+    - rancher-gmsa-account-provider-0.0.1.tgz
+    version: 0.0.1
+  rancher-gmsa-plugin-installer:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Rancher gMSA CCG Plugin
+      catalog.cattle.io/experimental: "true"
+      catalog.cattle.io/kube-version: '>=1.24.0'
+      catalog.cattle.io/os: windows
+      catalog.cattle.io/permits-os: windows
+      catalog.cattle.io/rancher-version: '>=2.7.0-0'
+    apiVersion: v2
+    created: "2023-09-01T14:17:00.207963-04:00"
+    description: The Rancher gMSA CCG Plugin assists Windows Container Credential
+      Guard during the non-domain-joined gMSA authorization process
+    digest: ce1d37e5e0e22160e385017071687374a2b7f4d9b2a18df5dccd90fa0fea40eb
+    icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
+    keywords:
+    - Windows
+    - Windows GMSA
+    - GMSA
+    - Active Directory
+    maintainers:
+    - email: harrison.affel@gmail.com
+      name: Harrison
+    - email: arvindiyengar@suse.com
+      name: Arvind
+    name: rancher-gmsa-plugin-installer
+    type: application
+    urls:
+    - rancher-gmsa-plugin-installer-0.0.1.tgz
+    version: 0.0.1
+generated: "2023-09-01T14:17:00.206928-04:00"

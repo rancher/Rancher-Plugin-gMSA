@@ -17,6 +17,11 @@ if [ -z "$ARCH" ]; then
     ARCH=$(go env GOHOSTARCH)
 fi
 
+# normalize windows version strings
+if [ -z "$OS" ] || [ "$OS" = "Windows_NT" ]; then
+  OS=$(go env GOHOSTOS)
+fi
+
 SUFFIX="-${ARCH}"
 
 TAG=${TAG:-${VERSION}${SUFFIX}}

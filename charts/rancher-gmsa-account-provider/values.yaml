@@ -1,0 +1,16 @@
+image:
+  # temporary repository
+  repository: harrisonwaffel/gmsa-account-provider
+  tag: dev-ltsc2022
+  imagePullPolicy: Always
+
+certificates:
+  serverSecretName: provider-certs
+  clientSecretName: client-certs
+  certManager:
+    enabled: true
+    version: ""
+
+global:
+  cattle:
+    systemDefaultRegistry:

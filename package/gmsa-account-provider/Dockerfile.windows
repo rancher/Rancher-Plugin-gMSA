@@ -1,6 +1,8 @@
 ARG NANOSERVER_VERSION
 FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION}
+ARG OS
+ARG ARCH
 
-COPY bin/gmsa-account-provider-windows-amd64.exe ./
+COPY bin/gmsa-account-provider-${OS}-${ARCH}.exe ./main.exe
 
-ENTRYPOINT ["gmsa-account-provider-windows-amd64.exe"]
+ENTRYPOINT ["main.exe"]

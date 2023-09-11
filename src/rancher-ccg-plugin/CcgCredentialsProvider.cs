@@ -12,10 +12,6 @@ using System.Web.Script.Serialization;
 namespace rancher.gmsa
 {
 
-    // TODO; env vars. How can we deploy this DLL in 'dev mode' so that we can more easily debug and
-    // assess issues? Primary benefit would be enable / disable event logs. We should ensure event logs are
-    // disabled when deployed to a real environment.
-
     [Guid("6ECDA518-2010-4437-8BC3-46E752B7B172")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
@@ -32,29 +28,6 @@ namespace rancher.gmsa
     [ProgId("CcgCredProvider")]
     public class CcgCredProvider : ServicedComponent, ICcgDomainAuthCredentials
     {
-        // logger is our Event Logger. We log to the Application source, not a custom source
-        // this allows us to circumvent privileged operations required to setup a new source
-        private EventLog logger;
-        public CcgCredProvider()
-        {
-            logger = new EventLog("Application");
-            logger.Source = "Application";
-        }
-
-        private void LogInfo(string log)
-        {
-            logger.WriteEntry(log, EventLogEntryType.Information, 101, 1);
-        }
-
-        private void LogWarn(string log)
-        {
-            logger.WriteEntry(log, EventLogEntryType.Warning, 201, 1);
-        }
-
-        private void LogError(string log)
-        {
-            logger.WriteEntry(log, EventLogEntryType.Error, 301, 1);
-        }
 
         public void GetPasswordCredentials(
             [MarshalAs(UnmanagedType.LPWStr), In] string pluginInput,
@@ -63,9 +36,27 @@ namespace rancher.gmsa
             [MarshalAs(UnmanagedType.LPWStr)] out string password)
         {
             ServicePointManager.Expect100Continue = true;
+
+            PluginInput decodedInput = DecodeInput(pluginInput);
+            SetupLogger(decodedInput);
+
+            bool certsAvailable = false;
+            var crt = "/var/lib/rancher/gmsa/" + decodedInput.ActiveDirectory + "/ssl/client/tls.pfx";
+            if (File.Exists(crt)) {
+                certsAvailable = true;
+            }
+
             try
             {
-                var response = GetCredential(DecodeInput(pluginInput));
+                ResponseBody response;
+                if (certsAvailable)
+                {
+                    response = GetCredential(decodedInput);
+                }
+                else
+                {
+                    response = GetUnverifiedCredential(decodedInput);
+                }
                 domainName = response.DomainName;
                 username = response.UserName;
                 password = response.Password;
@@ -81,16 +72,14 @@ namespace rancher.gmsa
             }
         }
 
+        // Queries the account provider API with mTLS certificates
         public ResponseBody GetCredential(PluginInput pluginInput)
         {
-            var secretUri = "https://localhost:" + pluginInput.Port + "/provider";
+
             // we don't have a PKI setup to distribute CRL, so disable the check globally
             ServicePointManager.CheckCertificateRevocationList = false;
 
-            // we use a pfx so we can bundle the cert and private key together in a single file
-            var crt = "/var/lib/rancher/gmsa/" + pluginInput.ActiveDirectory + "/ssl/client/tls.pfx";
-            X509Certificate2 clientCertificate = new X509Certificate2(File.ReadAllBytes(crt), (string)null, X509KeyStorageFlags.MachineKeySet);
-            LogInfo("Preparing to make request: Using secret: " + pluginInput.SecretName + "from namespace: " + pluginInput.ActiveDirectory + " and port: " + pluginInput.Port + " results in uri: " + secretUri);
+            X509Certificate2 clientCertificate = new X509Certificate2(File.ReadAllBytes(pluginInput.GetCertFile()), (string)null, X509KeyStorageFlags.MachineKeySet);
 
             try
             {
@@ -102,27 +91,93 @@ namespace rancher.gmsa
                     CheckCertificateRevocationList = false,
                 });
 
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, secretUri);
-                httpRequestMessage.Headers.Add("object", pluginInput.SecretName);
-
-                var response = httpClient.SendAsync(httpRequestMessage).Result;
-                var x = response.Content.ReadAsStringAsync().Result;
-                LogInfo("Got response, " + response.Content.ToString() + ", and content of: " + x);
+                var responseBody = MakeRequest(httpClient, pluginInput);
 
                 // creating x509Certificate2 objects writes a few files to disk,
                 // make sure we clean them up now that we are done with them
                 clientCertificate.Reset();
                 clientCertificate.Dispose();
 
-                return new JavaScriptSerializer().Deserialize<ResponseBody>(x);
+                return new JavaScriptSerializer().Deserialize<ResponseBody>(responseBody);
             }
             catch (Exception ex)
             {
                 LogError("Http Client Hit An Exception: \n " + ex.ToString());
             }
+
             clientCertificate.Reset();
             clientCertificate.Dispose();
             return null;
+        }
+
+        // Queries the account provider API without mTLS certificates
+        public ResponseBody GetUnverifiedCredential(PluginInput pluginInput)
+        {
+            var secretUri = "https://localhost:" + pluginInput.Port + "/provider";
+            try
+            {
+                HttpClient httpClient = new HttpClient(new HttpClientHandler{});
+
+                var responseBody = MakeRequest(httpClient, pluginInput);
+
+                return new JavaScriptSerializer().Deserialize<ResponseBody>(responseBody);
+            }
+            catch (Exception ex)
+            {
+                LogError("Http Client Hit An Exception: \n " + ex.ToString());
+            }
+            return null;
+        }
+
+        public string MakeRequest(HttpClient client, PluginInput pluginInput)
+        {
+            var secretUri = "https://localhost:" + pluginInput.Port + "/provider";
+            LogInfo("Preparing to make request: Using secret: " + pluginInput.SecretName + " from namespace: " + pluginInput.ActiveDirectory + " and port: " + pluginInput.Port + " results in uri: " + secretUri);
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, secretUri);
+            httpRequestMessage.Headers.Add("object", pluginInput.SecretName);
+            var response = client.SendAsync(httpRequestMessage).Result;
+            var responseBody = response.Content.ReadAsStringAsync().Result;
+            LogInfo("Got response with content of: " + responseBody);
+            return responseBody;
+        }
+
+        // logger is our Event Logger. We log to the Application source, not a custom source
+        // this allows us to circumvent privileged operations required to setup a new source
+        private EventLog logger;
+        private bool writeLogs;
+        public CcgCredProvider()
+        {
+            logger = new EventLog("Application");
+            logger.Source = "Application";
+        }
+
+        private void LogInfo(string log)
+        {
+            if (!writeLogs)
+            {
+                return;
+            }
+            logger.WriteEntry(log, EventLogEntryType.Information, 101, 1);
+        }
+
+        private void LogWarn(string log)
+        {
+            if (!writeLogs)
+            {
+                return;
+            }
+            logger.WriteEntry(log, EventLogEntryType.Warning, 201, 1);
+        }
+
+        private void LogError(string log)
+        {
+            logger.WriteEntry(log, EventLogEntryType.Error, 301, 1);
+        }
+
+        private void SetupLogger(PluginInput decodedInput)
+        {
+            writeLogs = File.Exists(decodedInput.GetDebugFile());
         }
 
         public PluginInput DecodeInput(string pluginInput)
@@ -157,15 +212,30 @@ namespace rancher.gmsa
 
             public string GetPort()
             {
-                string subDirFile = "/var/lib/rancher/gmsa/" + this.ActiveDirectory + "/port.txt";
                 try
                 {
-                    return File.ReadAllText(subDirFile);
+                    return File.ReadAllText(GetPortFile());
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("Failed to open port file located at " + subDirFile + ": " + e.ToString());
+                    throw new Exception("Failed to open port file located at " + GetPortFile() + ": " + e.ToString());
                 }
+            }
+
+            public string GetPortFile()
+            {
+                return "/var/lib/rancher/gmsa/" + this.ActiveDirectory + "/port.txt";
+            }
+
+            public string GetCertFile()
+            {
+                // we use a pfx so we can bundle the cert and private key together in a single file
+                return "/var/lib/rancher/gmsa/" + this.ActiveDirectory + "/ssl/client/tls.pfx";
+            }
+
+            public string GetDebugFile()
+            {
+                return "/var/lib/rancher/gmsa/" + this.ActiveDirectory + "/enable-logs.txt";
             }
         }
     }

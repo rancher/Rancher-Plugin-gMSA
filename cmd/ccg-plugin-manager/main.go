@@ -41,7 +41,7 @@ func main() {
 type CCGPluginInstaller struct {
 }
 
-func (i *CCGPluginInstaller) Run(cmd *cobra.Command, args []string) error {
+func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
@@ -53,7 +53,7 @@ func (i *CCGPluginInstaller) Run(cmd *cobra.Command, args []string) error {
 type CCGPluginUninstaller struct {
 }
 
-func (i *CCGPluginUninstaller) Run(cmd *cobra.Command, args []string) error {
+func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()

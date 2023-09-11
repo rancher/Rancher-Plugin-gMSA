@@ -110,6 +110,11 @@ func WriteCerts(namespace string) error {
 		return nil
 	}
 
+	err := createDirectory(fmt.Sprintf(hostSslDir, gmsaDirectory, namespace))
+	if err != nil {
+		return fmt.Errorf("failed to setup base host certificate directory: %v", err)
+	}
+
 	files := getCertFiles(namespace)
 	for _, file := range files {
 		err := createDirectory(file.hostDir)
@@ -140,7 +145,7 @@ func WriteCerts(namespace string) error {
 		default:
 			err = importCertificate(file)
 			if err != nil {
-				return fmt.Errorf("failed to import certificate: %v\n", err)
+				return fmt.Errorf("failed to import certificate: %v", err)
 			}
 		}
 	}
@@ -151,12 +156,12 @@ func WriteCerts(namespace string) error {
 func generateAndImportPfx(file certFile) error {
 	err := pfxConvert(file)
 	if err != nil {
-		return fmt.Errorf("error encountered generating pfx file: %v\n", err)
+		return fmt.Errorf("error encountered generating pfx file: %v", err)
 	}
 
 	err = pfxImport(file)
 	if err != nil {
-		return fmt.Errorf("error encountered importing pfx file: %v\n", err)
+		return fmt.Errorf("error encountered importing pfx file: %v", err)
 	}
 
 	err = removeKeyFile(file)
@@ -206,7 +211,7 @@ func pfxImport(file certFile) error {
 func removeKeyFile(file certFile) error {
 	err := os.Remove(strings.ReplaceAll(file.hostFile, ".crt", ".key"))
 	if err != nil {
-		return fmt.Errorf("failed to remove key file associated with %s: %v\n", file.hostFile, err)
+		return fmt.Errorf("failed to remove key file associated with %s: %v", file.hostFile, err)
 	}
 	return nil
 }

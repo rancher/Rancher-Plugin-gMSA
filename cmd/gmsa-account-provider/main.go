@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 
 	pkg "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,55 +17,60 @@ var (
 )
 
 type GMSAAccountProvider struct {
-	Kubeconfig string `usage:"Kubeconfig file" env:"KUBECONFIG"`
-	Namespace  string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
+	Kubeconfig    string `usage:"Kubeconfig file" env:"KUBECONFIG"`
+	Namespace     string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
+	DisableMTLS   bool   `usage:"Disable mTLS" default:"false" env:"DISABLE_MTLS"`
+	SkipArtifacts bool   `usage:"Prevents any files from being written to the host. Implicitly disables mTLS." default:"false" env:"DISABLE_ARTIFACTS"`
 }
 
 func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
-	if len(a.Namespace) != 1 {
+	if a.Namespace == "" {
 		return fmt.Errorf("rancher-gmsa-account-provider can only be started in a single namespace")
 	}
 
 	// pprof and cli debug
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		err := http.ListenAndServe("localhost:6060", nil)
+		if err != nil {
+			logrus.Errorf("could not start pprof: %v", err)
+		}
 	}()
 	debugConfig.MustSetupDebug()
 
-	namespace := os.Getenv("NAMESPACE")
-
-	controller, err := pkg.NewClient(namespace, a.Kubeconfig)
+	controller, err := pkg.NewClient(a.Namespace, a.Kubeconfig)
 	if err != nil {
 		return fmt.Errorf("failed to setup client: %v", err)
 	}
 
-	server := pkg.HttpServer{
+	server := pkg.HTTPServer{
 		Credentials: controller,
 	}
 	server.Engine = pkg.NewGinServer(&server)
 
 	// create all the files and directories we need on the host
-	// these calls will be no-ops on OS's other than Windows
+	if !a.SkipArtifacts {
+		err = pkg.CreateDynamicDirectory(a.Namespace)
+		if err != nil {
+			return fmt.Errorf("failed to create dynamic directory: %v", err)
+		}
 
-	err = pkg.CreateDir(namespace)
-	if err != nil {
-		return fmt.Errorf("failed to create dynamic directory: %v", err)
-	}
-
-	err = pkg.WriteCerts(namespace)
-	if err != nil {
-		return fmt.Errorf("failed to write mTLS certificates to host: %v", err)
+		err = pkg.WriteCerts(a.Namespace)
+		if err != nil {
+			return fmt.Errorf("failed to write mTLS certificates to host: %v", err)
+		}
 	}
 
 	errChan := make(chan error)
-	port, err := server.StartServer(errChan, namespace, debugConfig.Debug)
+	port, err := server.StartServer(errChan, a.Namespace, a.DisableMTLS || a.SkipArtifacts)
 	if err != nil {
 		return fmt.Errorf("failed to start http server: %v", err)
 	}
 
-	err = pkg.WritePortFile(namespace, port)
-	if err != nil {
-		return fmt.Errorf("failed to create dynamic directory: %v", err)
+	if !a.SkipArtifacts {
+		err = pkg.WritePortFile(a.Namespace, port)
+		if err != nil {
+			return fmt.Errorf("failed to create dynamic directory: %v", err)
+		}
 	}
 
 	// block on http server error
