@@ -3,7 +3,7 @@ action: install
 image:
   # temporary repository
   repository: harrisonwaffel/ccg-plugin-installer
-  tag: dev-ltsc2022
+  tag: latest
   imagePullPolicy: Always
 
 global:

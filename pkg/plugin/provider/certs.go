@@ -35,6 +35,7 @@ const (
 	hostClientDir = hostSslDir + "/client"
 	hostClientCa  = hostClientDir + "/ca.crt"
 	hostClientCrt = hostClientDir + "/tls.crt"
+	hostClientPfx = hostClientDir + "/tls.pfx"
 	hostClientKey = hostClientDir + "/tls.key"
 
 	hostServerDir = hostSslDir + "/server"
@@ -138,6 +139,14 @@ func WriteCerts(namespace string) error {
 		case file.isKey:
 			continue
 		case file.pfxConvert:
+			_, err := os.Stat(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
+			if err == nil {
+				err = os.Remove(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
+				if err != nil {
+					return fmt.Errorf("failed to remove outdated pfx file: %v", err)
+				}
+			}
+
 			err = generateAndImportPfx(file)
 			if err != nil {
 				return fmt.Errorf("failed to create and import pfx file: %v", err)

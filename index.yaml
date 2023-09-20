@@ -10,10 +10,10 @@ entries:
       catalog.cattle.io/permits-os: windows
       catalog.cattle.io/rancher-version: '>=2.7.0-0'
     apiVersion: v2
-    created: "2023-09-01T14:17:00.20772-04:00"
+    created: "2023-09-21T14:36:50.160659-04:00"
     description: The Rancher gMSA Account Provider assists the Rancher gMSA CCG Plugin
       during the non-domain-joined gMSA authorization process
-    digest: 2244f3428b6ad7f084ad9fcd00d2206899d9ad0b1e43a560c4a55674513e1471
+    digest: a94c2e2ac8fe1747a1d40d1455c094ee6d63a16f388f757a97027cd03af3c34f
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
@@ -40,7 +40,7 @@ entries:
       catalog.cattle.io/permits-os: windows
       catalog.cattle.io/rancher-version: '>=2.7.0-0'
     apiVersion: v2
-    created: "2023-09-01T14:17:00.207963-04:00"
+    created: "2023-09-21T14:36:50.160952-04:00"
     description: The Rancher gMSA CCG Plugin assists Windows Container Credential
       Guard during the non-domain-joined gMSA authorization process
     digest: ce1d37e5e0e22160e385017071687374a2b7f4d9b2a18df5dccd90fa0fea40eb
@@ -60,4 +60,4 @@ entries:
     urls:
     - rancher-gmsa-plugin-installer-0.0.1.tgz
     version: 0.0.1
-generated: "2023-09-01T14:17:00.206928-04:00"
+generated: "2023-09-21T14:36:50.159995-04:00"

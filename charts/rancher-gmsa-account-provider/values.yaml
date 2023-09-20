@@ -1,7 +1,7 @@
 image:
   # temporary repository
   repository: harrisonwaffel/gmsa-account-provider
-  tag: dev-ltsc2022
+  tag: latest
   imagePullPolicy: Always
 
 certificates:
@@ -10,6 +10,13 @@ certificates:
   certManager:
     enabled: true
     version: ""
+
+secret:
+  createDefault: true
+  name:
+  username:
+  password:
+  domainName:
 
 global:
   cattle:
