@@ -1,12 +1,12 @@
 # Getting Started
 
-The Rancher CCG gMSA Plugin feature comprises two components, the plugin installer (which installs the CCG plugin), and the account provider (which the ccg plugin uses to obtain domain login credentials). Installing both Helm charts is required in order for a cluster to support non-domain-joined nodes. 
+The Rancher CCG gMSA Plugin feature comprises two components, the plugin installer (which installs the CCG plugin), and the account provider (which the plugin uses to obtain login credentials for a domain). Installing both Helm charts is required in order for a cluster to support domainless GMSA.  
 
 ## Prerequisites 
 
 + Kubernetes v1.24+, containerD 1.7+
 + Nodes running `Windows Server 2019`, `Windows Server 2022`, `Windows Server Core 2019`, or `Windows Server Core 2022 
-`+ The gMSA Web-hook chart installed ([Official Repo](https://github.com/kubernetes-sigs/windows-gmsa), [Rancher Specific Chart](https://github.com/rancher/charts/tree/release-v2.7/charts/rancher-windows-gmsa))\
+`+ Upstream gMSA Web-hook chart installed ([Official Repo](https://github.com/kubernetes-sigs/windows-gmsa), [Rancher Specific Chart](https://github.com/rancher/charts/tree/release-v2.7/charts/rancher-windows-gmsa))\
   + **Note:** Currently, the gMSA Web-Hook chart offered by Rancher **does not contain the required changes to support non-domain joined nodes**. This chart will be updated soon, in the meantime you should use the following repository `harrisonwaffel/charts` and test against the `update-gmsa` branch (this can be done by configuring a new app repository in the Rancher UI).
 + An Active Directory instance which is reachable by worker nodes
 + One or more Active Directory gMSA accounts 
@@ -25,15 +25,13 @@ The Rancher CCG gMSA Plugin feature comprises two components, the plugin install
 
 ### In a normal Kubernetes cluster (via running Helm 3 locally)
 
-1. Ensure that the Rancher `Windows GMSA` chart is already installed
-
-2. Install `rancher-gmsa-plugin-installer` onto your cluster via Helm to install the CCG Plugin DLL onto your Windows worker nodes
+1. Install `rancher-gmsa-plugin-installer` onto your cluster via Helm to install the CCG Plugin DLL onto your Windows worker nodes
 
 ```
 helm install -n cattle-gmsa-system Rancher-Plugin-gMSA charts/rancher-gmsa-plugin-installer
 ```
 
-3. Install `rancher-gmsa-account-provider` chart to deploy the account provider API onto your Windows worker nodes.  
+2. Install `rancher-gmsa-account-provider` chart to deploy the account provider API onto your Windows worker nodes.  
 
 ```bash
 helm install -n cattle-helm-system Rancher-Plugin-gMSA-account-provider charts/rancher-gmsa-account-provider
@@ -42,9 +40,8 @@ helm install -n cattle-helm-system Rancher-Plugin-gMSA-account-provider charts/r
 ### Checking if the Rancher gMSA CCG Plugin Works
 
 1. Ensure that the init container deployed with each pod of the `rancher-gmsa-plugin-installer` chart successfully completes and does not log any errors.
-2. Ensure that all pods spawned from the `rancher-gmsa-account-provider` deamon set have started properly and do not log any errors
-3. Configure a `GMSACredentialSpec` resource to specify an existing gMSA account, and ensure that the `HostAccountConfig` field is present and configured to use the Rancher CCG gMSA Plugin. 
-4. Deploy a Windows workload which leverages a gMSA account, ensure that it successfully transitions to 'Running'
+2. Ensure that all pods spawned from the `rancher-gmsa-account-provider` deamon set have started properly and do not log any errors 
+3. Deploy a Windows workload which leverages a gMSA account, ensure that it successfully transitions to 'Running'
 
 ## Uninstalling the Rancher gMSA CCG Plugin
 
