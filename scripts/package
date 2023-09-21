@@ -35,7 +35,7 @@ for i in "${IMAGES[@]}"; do
       for v in "${FINAL_IMAGES[@]}"; do
         MULTI_ARCH_CMD+="--amend $v "
       done
-      docker manifest create "${REPO}/$i:latest" ${MULTI_ARCH_CMD}
+      docker manifest create "${REPO}/$i:${TAG}" ${MULTI_ARCH_CMD}
 
     else
       # don't try to build if the file doesn't exist
