@@ -59,3 +59,27 @@ func verifyInstall() (bool, bool, bool, bool, error) {
 
 	return !directoryDoesNotExist, !fileDoesNotExist, CCGEntryExists, ClassesRootKeyExists, nil
 }
+
+func dllFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, dllFileName)
+}
+
+func outdatedDllFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, oldDllFileName)
+}
+
+func tlbFileFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, tlbFileName)
+}
+
+func installScriptFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, installFileName)
+}
+
+func uninstallScriptFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, uninstallFileName)
+}
+
+func cleanUpScriptFilePath() string {
+	return fmt.Sprintf("%s\\%s", baseDir, cleanupFileName)
+}

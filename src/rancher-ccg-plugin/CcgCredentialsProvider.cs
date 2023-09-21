@@ -139,6 +139,11 @@ namespace rancher.gmsa
             var response = client.SendAsync(httpRequestMessage).Result;
             var responseBody = response.Content.ReadAsStringAsync().Result;
             LogInfo("Got response with content of: " + responseBody);
+
+            if (responseBody == "") {
+                throw new Exception("received empty response body from account-provider API");
+            }
+
             return responseBody;
         }
 
