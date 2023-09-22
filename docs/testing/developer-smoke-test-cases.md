@@ -1,13 +1,15 @@
 # Developer Test Cases
 
-During development, the following tests cases should be checked **_at minimum_** for each supported environment. This page provides a set of repeatable test cases which verify that the entire deployment and authorization flow of the feature functions as expected. More specific test cases relating to a particular component of the feature can be found in their respective directories. The creation and management of test environments can be automated through the use of terraform modules included within the [`rancher/windows`](https://github.com/rancher/windows/tree/main/terraform) repo. It's advised to use those terraform modules when preparing an environment to manually verify any of the test cases listed on this page, configuring these environments manually takes significant effort and time.
+During development, the following tests cases should be checked **_at minimum_** for each supported environment. This page provides a set of repeatable test cases which verify that the entire deployment and authorization flow of the feature functions as expected. More specific test cases relating to a particular component of the feature can be found in their respective directories.
+
+The creation and management of test environments can be automated through the use of terraform modules included within the [`rancher/windows`](https://github.com/rancher/windows/tree/main/terraform) repo. It's advised to use those terraform modules when preparing an environment to manually verify any of the test cases listed on this page, configuring these environments manually takes significant effort and time.
 
 # Prerequisites 
 
 Regardless of cluster configurations, the following prerequisites must be met:
 
 + A cluster running Kubernetes v1.24+, with ContainerD 1.7+
-    + We develop against the latest version of [RKE2](https://github.com/rancher/rke2), however this project should also work on other Kubernetes Distros which support Windows Workers and have support for `hostProcess` pods
+    + We develop against the latest version of [RKE2](https://github.com/rancher/rke2), however this project should also work on other Kubernetes distributions which support Windows Workers and have support for `hostProcess` pods
 + Windows worker nodes running one of the following OS versions: `Windows Server 2019`, `Windows Server 2022`, `Windows Server Core 2019`, `Windows Server Core 2022`. No other versions are supported. 
 + An Active Directory Domain which can be contacted by the Windows Worker nodes and workloads
 + An Active Directory impersonation (user) account and gMSA account, both of which are in the same security group
@@ -37,7 +39,7 @@ This project supports a number of cluster environments:
 + Clusters with 1 or more Windows workers which are **joined** to a **single** domain _as well as_ 1 or more Windows workers **not joined** to any domain
 + Clusters with 1 or more Windows workers which are all **not joined** to any domain
 
-We _currently_ do **not** support the following environments, though they are technically possible
+We currently do **not** provide support for or test against the following environments, though they are technically possible
 
 + Clusters with 1 or more Windows workers interacting with **multiple** domains at once, either joined or un-joined
 + Clusters interacting with **multiple** Active Directory instances at once
@@ -51,6 +53,8 @@ Each test may utilize the same gMSA workload to verify the proper function of th
 <summary>
 Sample gMSA Workload
 </summary>
+
+The below yaml can be used to deploy a workload utilizing a gMSA account. Several fields must be modified in accordance with your Active Directory environment. The workload uses a `windows/servercore` base image, to leverage the Active Directory authentication apis. The `servercore` base image is ~4GB (!). Expect a lengthy image pull time the first time you deploy this workload; grab a drink, relax. 
 
 ```yaml 
 ---
@@ -105,7 +109,7 @@ spec:
     spec:
       dnsConfig:
         nameservers:
-          - <ACTIVE_DIRECTORY_NODE_IP>
+          - <ACTIVE_DIRECTORY_DOMAIN_CONTROLLER_IP>
         searches:
           - <YOUR_ACTIVE_DIRECTORY_DOMAIN_NAME>
       serviceAccount: rancher-windows-gmsa
@@ -169,12 +173,13 @@ The following procedure should be performed against all supported environments a
 5. Create a Windows workload which leverages your gMSA account (see above sample workload for an example)
     1. Ensure the workload becomes available, and that the CCG event log does not log any errors 
 6. SSH into the sample workload and run the following commands
-   1. `nltest \query`
-   2. `nltest \sc_query:<YOUR_DOMAIN_NAME>`
+   1. `nltest /parentdomain` should return the domain name configured within the GMSACredentialSpec 
+   2. `nltest /query` should return `NERR_Success`, indicating no error was encountered contacting the domain controller
+   3. `nltest /sc_query:<YOUR_DOMAIN_NAME>` should return `NERR_Success`, indicating no error was encountered contacting the domain controller
 7. Delete the sample Workload
 8. Uninstall the Rancher gMSA Account Provider Chart
 9. Start to remove the CCG Plugin Installer Helm application
-   1. First, modify the Helm release and change the `action` field to `uninstall` to initiate an uninstall of the plugin
+   1. First, modify the Helm release and change the `action` field to `uninstall` to uninstall the plugin
    2. Wait for the new ccg plugin installer container to deploy and initialize 
    3. Remove the Helm release from the cluster
 10. SSH into each node, and ensure that the files listed in `Expected Files For The Plugin Installer Post Uninstall` exist 
