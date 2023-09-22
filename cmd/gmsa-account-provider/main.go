@@ -37,18 +37,18 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}()
 	debugConfig.MustSetupDebug()
 
-	controller, err := pkg.NewClient(a.Namespace, a.Kubeconfig)
+	client, err := pkg.NewClient(a.Namespace, a.Kubeconfig)
 	if err != nil {
 		return fmt.Errorf("failed to setup client: %v", err)
 	}
 
 	server := pkg.HTTPServer{
-		Credentials: controller,
+		Credentials: client,
 	}
-	server.Engine = pkg.NewGinServer(&server)
+	server.Engine = pkg.NewGinServer(&server, debugConfig.Debug)
 
-	// create all the files and directories we need on the host
 	if !a.SkipArtifacts {
+		// create all the files and directories we need on the host
 		err = pkg.CreateDynamicDirectory(a.Namespace)
 		if err != nil {
 			return fmt.Errorf("failed to create dynamic directory: %v", err)

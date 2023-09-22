@@ -54,8 +54,12 @@ func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMT
 	return port, nil
 }
 
-func NewGinServer(h *HTTPServer) *gin.Engine {
+func NewGinServer(h *HTTPServer, debug bool) *gin.Engine {
 	e := gin.Default()
+	if !debug {
+		// gin uses debug mode by default
+		gin.SetMode(gin.ReleaseMode)
+	}
 	e.GET("/provider", h.handle)
 	return e
 }
