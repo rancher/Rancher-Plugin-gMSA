@@ -111,11 +111,6 @@ func WriteCerts(namespace string) error {
 		return nil
 	}
 
-	err := createDirectory(fmt.Sprintf(hostSslDir, gmsaDirectory, namespace))
-	if err != nil {
-		return fmt.Errorf("failed to setup base host certificate directory: %v", err)
-	}
-
 	files := getCertFiles(namespace)
 	for _, file := range files {
 		err := createDirectory(file.hostDir)
@@ -139,15 +134,7 @@ func WriteCerts(namespace string) error {
 		case file.isKey:
 			continue
 		case file.pfxConvert:
-			_, err := os.Stat(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
-			if err == nil {
-				err = os.Remove(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
-				if err != nil {
-					return fmt.Errorf("failed to remove outdated pfx file: %v", err)
-				}
-			}
-
-			err = generateAndImportPfx(file)
+			err = generateAndImportPfx(file, namespace)
 			if err != nil {
 				return fmt.Errorf("failed to create and import pfx file: %v", err)
 			}
@@ -162,8 +149,13 @@ func WriteCerts(namespace string) error {
 	return nil
 }
 
-func generateAndImportPfx(file certFile) error {
-	err := pfxConvert(file)
+func generateAndImportPfx(file certFile, namespace string) error {
+	err := pfxClean(namespace)
+	if err != nil {
+		return fmt.Errorf("error encountered cleaning outdated pfx file: %v", err)
+	}
+
+	err = pfxConvert(file)
 	if err != nil {
 		return fmt.Errorf("error encountered generating pfx file: %v", err)
 	}
@@ -188,6 +180,17 @@ func importCertificate(file certFile) error {
 		return fmt.Errorf("failed to add certificate to LocalMachine Root store (%s): %v", cmd.String(), err)
 	}
 	logrus.Debug(string(out))
+	return nil
+}
+
+func pfxClean(namespace string) error {
+	_, err := os.Stat(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
+	if err == nil {
+		err = os.Remove(fmt.Sprintf(fmt.Sprintf(hostClientPfx, gmsaDirectory, namespace)))
+		if err != nil {
+			return fmt.Errorf("failed to remove outdated pfx file: %v", err)
+		}
+	}
 	return nil
 }
 

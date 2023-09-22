@@ -44,6 +44,15 @@ func Upgrade() error {
 // needsUpgrade checks if there are any differences between the old DLL and the new DLL
 // by directly comparing their contents
 func needsUpgrade() (bool, error) {
+	directoryExists, fileExists, CCGEntryExists, ClassesRootKeyExists, err := verifyInstall()
+	if err != nil {
+		return false, fmt.Errorf("failed to detect installation status during upgrade: %v", err)
+	}
+
+	if !directoryExists && !fileExists && !CCGEntryExists && !ClassesRootKeyExists {
+		logrus.Warnf("could not find an existing plugin to upgrade, has the plugin been installed yet?")
+		return false, nil
+	}
 
 	// this function needs recovery logic. If we somehow hit an error after renaming the file
 	// then the node would have no gmsa functionality.

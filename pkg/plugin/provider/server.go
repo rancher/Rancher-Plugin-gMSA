@@ -68,10 +68,11 @@ func (h *HTTPServer) handle(c *gin.Context) {
 		return
 	}
 
-	s, err := h.Credentials.Secrets.Get(c.GetHeader("object"), metav1.GetOptions{})
+	s, err := h.Credentials.Secrets.Get(secret, metav1.GetOptions{})
 	// Handle forbidden requests in the same manner as 404's so no feedback is given to the caller
 	if errors.IsForbidden(err) || errors.IsNotFound(err) {
 		c.Status(http.StatusNotFound)
+		logrus.Warnf("error retrieving secret %s: %v", secret, err)
 		return
 	}
 
