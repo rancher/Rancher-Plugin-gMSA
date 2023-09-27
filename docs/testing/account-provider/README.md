@@ -30,12 +30,10 @@ The Account Provider is complemented by the CCG Plugin, and as such end-to-end t
 
 #### Valid `GMSACredentialSpec`
 
-`a-test-namespace:this-is-a-test`
-
 0. Ensure that the GMSA webhook and Rancher gMSA Plugin Installer charts are both installed onto your cluster
 1. If not yet deployed, deploy the Account Provider chart into the `a-test-namespace` namespace
 2. If not yet created, create a new secret within the `a-test-namespace` titled `this-is-a-test`, ensure the secret is `Opaque` and has `username`, `password`, and `domainName` fields. Each field should have a valid value given your Active Directory instance, and should be base64 encoded. 
-3. Configure a GMSACredentialSpec for the desired gMSA account and ensure that the `PluginInput` field has the following content: `a-test-namespace:this-is-a-test`
+3. Configure a `GMSACredentialSpec` for the desired gMSA account and ensure that the `PluginInput` field has the following content: `a-test-namespace:this-is-a-test`
 4. Deploy a workload onto the cluster which leverages a gMSA account 
 5. Ensure that the workload successfully becomes ready
 6. Ensure that the Account Provider API logs the request made by the CCG plugin, and that no errors are observed 
@@ -48,9 +46,8 @@ The Account Provider is complemented by the CCG Plugin, and as such end-to-end t
 3. If not yet created, create a new secret within the `a-test-namespace` titled `this-is-a-test`, ensure the secret is `Opaque` and has `username`, `password`, and `domainName` fields. Each field should have a valid value given your Active Directory instance, and should be base64 encoded.
 4. Configure / reconfigure a GMSACredentialSpec, ensure that the following is used for the `PluginInput`: `bad-namespace:this-is-a-test`
 5. Deploy a workload onto the cluster which leverages the GMSACredentialSpec
-6. Ensure that the Account Provider API logs the request
-7. Ensure that the Account Provider API logs the error message encountered when retrieving a non-existent secret
-8. Ensure that the workload does not become ready 
+6. Ensure that the Account Provider API does not log a request
+7. Ensure that the workload does not become ready 
 
 #### Missing Secret name in `GMSACredentialSpec`
 

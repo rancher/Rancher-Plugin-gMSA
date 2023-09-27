@@ -4,6 +4,15 @@ During development, the following tests cases should be checked **_at minimum_**
 
 The creation and management of test environments can be automated through the use of terraform modules included within the [`rancher/windows`](https://github.com/rancher/windows/tree/main/terraform) repo. It's advised to use those terraform modules when preparing an environment to manually verify any of the test cases listed on this page, configuring these environments manually takes significant effort and time.
 
+# Supported Versions of RKE2
+
+##### _As of September 27th 2023_ the following released RKE2 versions support this feature (by virtue of using containerd 1.7+)
+
++ `v1.24.14`, `v1.24.15`, `v1.24.16`, `v1.24.17`  
++ `v1.25.10`, `v1.25.11`, `v1.25.12`, `v1.25.13`, `v1.25.14`, `v1.25.15`  
++ `v1.26.5`, `v1.26.6`, `v1.26.7`, `v1.26.8`, `v1.26.9`
++ `v1.27.2`, `v1.27.3`, `v1.27.4`, `v1.27.5`, `v1.27.6`
+
 # Prerequisites 
 
 Regardless of cluster configurations, the following prerequisites must be met:
@@ -189,7 +198,9 @@ The following procedure should be performed against all supported environments a
 After initial installation, the following files should exist on each host:
 
 `C:\Program Files\RanchergMSACredentialProvider\RanchergMSACredentialProvider.dll`
+
 `C:\Program Files\RanchergMSACredentialProvider\RanchergMSACredentialProvider.tlb`
+
 `C:\Program Files\RanchergMSACredentialProvider\install-plugin.ps1`
 
 ## Expected Files For The Plugin Installer Post Uninstall

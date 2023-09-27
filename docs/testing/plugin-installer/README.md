@@ -26,7 +26,7 @@ During execution of the `uninstall` command the host will be modified in 3 ways:
 Debugging Plugin Installation
 ---
 
-the plugin installer contains logic to verify if the plugin is already installed on a host, as well as if the installation completed successfully. However, if you wish to manually verify a proper installation manually, the following should be done: 
+the plugin installer contains logic to verify if the plugin is already installed on a host, as well as if the installation completed successfully. However, if you wish to verify a proper installation manually, the following should be done: 
 
 > **Note:** 
 > Registry keys in the below steps are abbreviated. `HKLM` is shown as 'HK_LOCAL_MACHINE' in the registry editor, and `HKCR` is shown as `HKEY_CLASSES_ROOT`
@@ -49,7 +49,7 @@ Debugging Plugin Installation
 4. Ensure that the `cleanup.ps1` script exists in the directory
 5. Using `regedit.exe`, ensure that the following registry key does not exist
     1. `HKCR:CLSID\{E4781092-F116-4B79-B55E-28EB6A224E26}`
-6. (Optional, only applicable to setups which also have the Account provider installed) execute clean.ps1 and ensure all subdirectories of `/var/lib/rancher/gmsa` have been removed properly
+6. (Optional, only applicable to setups which also have the Account provider installed) execute `clean.ps1` and ensure all subdirectories of `/var/lib/rancher/gmsa` have been removed properly
 
 
 Enabling and Viewing the CCG Plugin Debug Logs
