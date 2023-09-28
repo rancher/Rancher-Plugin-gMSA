@@ -2,17 +2,25 @@ Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin)
 ========
 ##### Current Status: **_Experimental_**
 
-The Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin) retrieves group managed service account (gMSA) credentials stored on a Kubernetes cluster to facilitate the domain-joined process.
+The Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin) retrieves Active Directory credentials stored on a Kubernetes cluster to allow Windows workloads on the cluster to assume the role of group managed service accounts (gMSAs).
 
 ## Requirements
 
-On a domain controller, a gMSA for the container and a standard user account that is used to retrieve the gMSA password needs to be created. These credentials need to be stored on the Kubernetes cluster as a Secret.
+On a domain controller, a standard user account  needs to be created. This user should have permissions to retrieve the managed passwords of the gMSAs that will be used by workloads on your cluster. This user's credentials need to be stored on the Kubernetes cluster as a Secret.
+
+> **Note**: To create such a setup in Azure, you can follow [the guide on the `rancher/windows` repository](https://github.com/rancher/windows/blob/main/docs/terraform/gmsa/environment_setup.md).
+>
+> However, it should be noted that **the Rancher Windows team does not support the Terraform modules in the `rancher/windows` repository in any official capacity.**
+>
+> Community members should note that modules contained in that repository are **never intended for use in any production environment** and are **subject to breaking changes at any point of time**.
+> 
+> The primary audience for the Terraform in the `rancher/windows` repository is **members of the Rancher Windows team** who require these modules to reproduce setups that mimic supported environments; however, it can be used as a reference architecture for how to set up a gMSA environment in Kubernetes.
 
 ## Who needs this CCG Plugin?
 
 Anyone who adds Windows hosts onto Kubernetes clusters who would like to schedule workloads that utilize gMSAs to communicate with Active Directory.
 
-By using this plugin, all your Windows hosts will be able to access a standard users account's credentials, which will allow the underlying container runtime on your Windows hosts to inject gMSA credentials into your pods.
+By using this plugin, all your Windows hosts will be able to access a standard user account's credentials, which will allow the underlying container runtime on your Windows hosts to inject gMSA credentials into your pods.
 
 These gMSA credentials can be used in a multitude of ways, including using them to offload user authentication for your applications to Active Directory (which is useful for **internal** applications that need to authenticate users within an organization that is managed via Active Directory).
 
@@ -32,19 +40,21 @@ On a high-level, all CCG Plugins take the following steps on a container being s
 
 1. `ccg.exe` (Container Credential Guard) is invoked by your container runtime (i.e. `containerd`) when a container that provides a "credential spec" for Windows is created
 
-2. `ccg.exe` invokes the CCG Plugin (installed as a [DLL (Dynamic Link Library)](https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/dynamic-link-library)) and passes in inputs from the "credential spec'
+2. `ccg.exe` invokes a CCG Plugin (installed as a [DLL (Dynamic Link Library)](https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/dynamic-link-library)) and passes in inputs from the "credential spec"
 
 3. The CCG Plugin retrieves connection details (i.e. an access token or some other credentials) and executes a request to a "secret store" (like Azure Key Vault) to get back Active Directory credentials tied to the standard user account
 
-4. `ccg.exe` retrieves the standard user account's credentials and uses it to retrieve the gMSA's credentials from Active Directory that corresponds to what was provided in the "credential spec"
+4. `ccg.exe` retrieves the standard user account's credentials, which are used to retrieve the gMSA's credentials from Active Directory that corresponds to what was provided in the "credential spec"
 
 5. The container runtime injects the credentials from `ccg.exe` into the container, which allows the application to use it
 
-The Rancher plugin follows the same process as above by storing the connection details in **Kubernetes secrets** that the CCG Plugin has access to via an **Account Provider API**, which runs as a `HostProcess` on each Windows host and represents the "secret store".
+The Rancher plugin follows the same process as above by storing the Active Directory credentials in **Kubernetes secrets** that the CCG Plugin has access to via an **Account Provider**, which runs as a `HostProcess` on each Windows host and serves as a proxy to the underlying "secret store" (i.e. the cluster itself).
 
+The connection details are automatically installed onto the host by the Account Provider `HostProcess` into a specific directory path (`/var/lib/rancher/gmsa/<namespace>/*`).
+
+To install the CCGRKC Plugin DLL, this repository also provides a Plugin Installer.
 
 ![](./docs/diagrams/simple-diagram.png)
-
 
 ## Getting Started
 
