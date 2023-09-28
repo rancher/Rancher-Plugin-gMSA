@@ -1,0 +1,23 @@
+image:
+  # temporary repository
+  repository: harrisonwaffel/gmsa-account-provider
+  tag: latest
+  imagePullPolicy: Always
+
+certificates:
+  serverSecretName: provider-certs
+  clientSecretName: client-certs
+  certManager:
+    enabled: true
+    version: ""
+
+secret:
+  createDefault: true
+  name:
+  username:
+  password:
+  domainName:
+
+global:
+  cattle:
+    systemDefaultRegistry:
