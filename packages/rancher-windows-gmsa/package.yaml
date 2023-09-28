@@ -1,4 +1,6 @@
-url: local
+url: https://github.com/kubernetes-sigs/windows-gmsa.git
+subdirectory: charts/gmsa
+commit: 7f48de91473ce9883b88f4252b2e074032b0a5df
 version: 3.0.0
 additionalCharts:
   - workingDir: charts-crd
@@ -6,4 +8,3 @@ additionalCharts:
       templateDirectory: crd-template
       crdDirectory: templates
       addCRDValidationToMainChart: true
-

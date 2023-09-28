@@ -1,0 +1,24 @@
+--- charts-original/templates/mutatingwebhook.yaml
++++ charts/templates/mutatingwebhook.yaml
+@@ -15,7 +15,7 @@
+         namespace: {{.Release.Namespace}}
+         path: "/mutate"
+       {{- if not (.Values.certificates.certManager.enabled) }}
+-      caBundle: {{ .Values.certificates.caBundle }}
++      caBundle: {{ template "certificates.cabundle" . }}
+       {{- end }}
+     rules:
+       - operations: ["CREATE"]
+@@ -28,10 +28,7 @@
+     # don't run on ${NAMESPACE}
+     namespaceSelector:
+       matchExpressions:
+-        - key: kubernetes.io/metadata.name
++        - key: gmsa-webhook
+           operator: NotIn
+-          values: [{{ .Release.Namespace }}]
+-        - key: windows.k8s.io/disabled
+-          operator: NotIn
+-          values: ["true"]
++          values: [disabled]
+ 

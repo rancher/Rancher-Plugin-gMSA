@@ -1,0 +1,11 @@
+--- charts-original/app-readme.md
++++ charts/app-readme.md
+@@ -4,6 +4,6 @@
+ 
+ ## Prerequisites
+ 
+-- Active Directory that support Group Managed Service Accounts
++- Active Directory that supports Group Managed Service Accounts
+ - A Group Managed Service Account
+-- Kubernetes v1.23+
++- Kubernetes v1.21+

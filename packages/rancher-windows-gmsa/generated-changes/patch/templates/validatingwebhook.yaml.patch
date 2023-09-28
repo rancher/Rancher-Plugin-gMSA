@@ -1,0 +1,28 @@
+--- charts-original/templates/validatingwebhook.yaml
++++ charts/templates/validatingwebhook.yaml
+@@ -12,10 +12,10 @@
+     clientConfig:
+       service:
+         name: {{ .Release.Name }}
+-        namespace: {{.Release.Namespace}}
++        namespace: {{ .Release.Namespace }}
+         path: "/validate"
+       {{- if not (.Values.certificates.certManager.enabled) }}
+-      caBundle: {{ .Values.certificates.caBundle }}
++      caBundle: {{ template "certificates.cabundle" . }}
+       {{- end }}
+     rules:
+       - operations: ["CREATE", "UPDATE"]
+@@ -28,10 +28,7 @@
+     # don't run on ${NAMESPACE}
+     namespaceSelector:
+       matchExpressions:
+-        - key: kubernetes.io/metadata.name
++        - key: gmsa-webhook
+           operator: NotIn
+-          values: [{{ .Release.Namespace }}]
+-        - key: windows.k8s.io/disabled
+-          operator: NotIn
+-          values: ["true"]
++          values: [disabled]
+ 
