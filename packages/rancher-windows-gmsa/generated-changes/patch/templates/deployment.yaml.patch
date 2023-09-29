@@ -1,19 +1,15 @@
 --- charts-original/templates/deployment.yaml
 +++ charts/templates/deployment.yaml
-@@ -1,8 +1,10 @@
+@@ -1,6 +1,8 @@
  apiVersion: apps/v1
  kind: Deployment
  metadata:
--  name: {{ .Release.Name}}
--  namespace: {{.Release.Namespace}}
 +  annotations:
 +    seccomp.security.alpha.kubernetes.io/pod: runtime/default
-+  name: {{ .Release.Name }}
-+  namespace: {{ .Release.Namespace }}
+   name: {{ .Release.Name }}
+   namespace: {{ .Release.Namespace }}
    labels: {{ include "gmsa.chartref" . | nindent 4 }}
- spec:
-   replicas: {{ .Values.replicaCount }}
-@@ -44,29 +46,28 @@
+@@ -44,13 +46,13 @@
              - containerPort: {{ .Values.containerPort }}
            volumeMounts:
              - name: tls
@@ -29,15 +25,8 @@
 +              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
              - name: HTTPS_PORT
                value: "{{ .Values.containerPort }}"
--      {{- if .Values.securityContext }}
--      securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
--      {{- end }}
-+          {{- if .Values.securityContext }}
-+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
-+          {{- end }}
-       volumes:
-         - name: tls
-           secret:
+           {{- if .Values.securityContext }}
+@@ -62,9 +64,9 @@
              secretName: {{ .Values.certificates.secretName }}
              items:
                - key: tls.key
@@ -49,5 +38,3 @@
        {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
        os:
          name: linux
-       {{- end -}}
--

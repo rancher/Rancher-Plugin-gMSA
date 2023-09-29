@@ -9,7 +9,7 @@
    # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
    caBundle: ""
    # If cert-manager integration is disabled, upload certs data (ca.crt, tls.crt and tls.key) as k8s secretName in the namespace
-@@ -10,37 +10,51 @@
+@@ -10,35 +10,52 @@
  
  credential:
    enabled: false
@@ -35,11 +35,12 @@
  
  image:
 -  repository: registry.k8s.io/gmsa-webhook/k8s-gmsa-webhook
+-  tag: v0.7.0
 +  repository: rancher/mirrored-sigwindowstools-k8s-gmsa-webhook
-   tag: v0.7.0
++  tag: v0.3.0
    imagePullPolicy: IfNotPresent
  
--# if true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
+ # if true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
  setPodOs: true
  
  global:
@@ -52,9 +53,8 @@
 +    pullPolicy: IfNotPresent
  
  affinity: {}
--nodeselector: {}
 +
-+nodeSelector: {}
+ nodeSelector: {}
 +
  podDisruptionBudget:
    enabled: false
@@ -70,7 +70,5 @@
  replicaCount: 2
 +
  securityContext: {}
--tolerations: []
- 
--
-+tolerations: []
++
+ tolerations: []

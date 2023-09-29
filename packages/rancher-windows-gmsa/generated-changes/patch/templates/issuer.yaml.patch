@@ -1,7 +1,0 @@
---- charts-original/templates/issuer.yaml
-+++ charts/templates/issuer.yaml
-@@ -23,4 +23,3 @@
- spec:
-   selfSigned: {}
- {{- end -}}
--

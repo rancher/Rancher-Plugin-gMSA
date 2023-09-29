@@ -22,8 +22,3 @@
  {{- $secret := (lookup "v1" "Secret" .Release.Namespace .Values.certificates.secretName) -}}
  {{- if lt (len $secret) 1 -}}
  {{- required (printf "CA Bundle secret '%s' in namespace '%s' must exist" .Values.certificates.secretName .Release.Namespace) "" -}}
-@@ -43,4 +47,3 @@
- INSERT_CERTIFICATE_FROM_SECRET
- {{- end -}}
- {{- end }}
--

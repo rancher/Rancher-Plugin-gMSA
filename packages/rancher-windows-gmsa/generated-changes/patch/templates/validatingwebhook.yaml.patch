@@ -1,11 +1,7 @@
 --- charts-original/templates/validatingwebhook.yaml
 +++ charts/templates/validatingwebhook.yaml
-@@ -12,10 +12,10 @@
-     clientConfig:
-       service:
-         name: {{ .Release.Name }}
--        namespace: {{.Release.Namespace}}
-+        namespace: {{ .Release.Namespace }}
+@@ -15,7 +15,7 @@
+         namespace: {{ .Release.Namespace }}
          path: "/validate"
        {{- if not (.Values.certificates.certManager.enabled) }}
 -      caBundle: {{ .Values.certificates.caBundle }}
@@ -13,8 +9,3 @@
        {{- end }}
      rules:
        - operations: ["CREATE", "UPDATE"]
-@@ -34,4 +34,3 @@
-         - key: windows.k8s.io/disabled
-           operator: NotIn
-           values: ["true"]
--

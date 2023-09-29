@@ -1,7 +1,0 @@
---- charts-original/templates/clusterrole.yaml
-+++ charts/templates/clusterrole.yaml
-@@ -13,4 +13,3 @@
-   - apiGroups: ["authorization.k8s.io"]
-     resources: ["localsubjectaccessreviews"]
-     verbs: ["create"]
--

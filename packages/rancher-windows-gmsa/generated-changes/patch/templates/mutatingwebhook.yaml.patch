@@ -9,8 +9,3 @@
        {{- end }}
      rules:
        - operations: ["CREATE"]
-@@ -34,4 +34,3 @@
-         - key: windows.k8s.io/disabled
-           operator: NotIn
-           values: ["true"]
--
