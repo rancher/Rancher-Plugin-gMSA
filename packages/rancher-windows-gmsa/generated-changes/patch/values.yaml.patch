@@ -1,47 +1,47 @@
 --- charts-original/values.yaml
 +++ charts/values.yaml
-@@ -2,45 +2,49 @@
+@@ -2,7 +2,7 @@
    certManager:
      # Enable cert manager integration. Cert manager should be already installed at the k8s cluster
      enabled: true
 -    version: "v1.10.1"
--  # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
--  caBundle: ""
 +    version: ""
+   # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
+   caBundle: ""
    # If cert-manager integration is disabled, upload certs data (ca.crt, tls.crt and tls.key) as k8s secretName in the namespace
-   secretName: gmsa-server-cert
+@@ -10,37 +10,51 @@
  
  credential:
--  enabled: false
-+  enabled: true
-+  enableNonJoined: false # Populates hostAccountConfig field
-+  hostAccountConfig:
-+    pluginGUID: "" # CCG Plugin GUID
-+    portableCcgVersion: "1" # This needs to equal the current version of CCG which right now is '1'
-+    pluginInput: "" # Format of this field is dependent upon specific CCG Plugin
+   enabled: false
++  hostAccountConfig: {}
++    # pluginGUID: "" # CCG Plugin GUID
++    # portableCcgVersion: "1" # This needs to equal the current version of CCG which right now is '1'
++    # pluginInput: "" # Format of this field is dependent upon specific CCG Plugin
    domainJoinConfig:
-     dnsName: ""  #DNS Domain Name
-     dnsTreeName: "" #DNS Domain Name Root
+-    dnsName: ""  #DNS Domain Name
+-    dnsTreeName: "" #DNS Domain Name Root
 -    guid: ""  #GUID
-+    guid: ""  # Active Directory Domain GUID
-     machineAccountName: "" #Username of the GMSA account
+-    machineAccountName: "" #Username of the GMSA account
 -    netBiosName: ""  #NETBIOS Domain Name
 -    sid: "" #SID of GMSA
-+    netBiosName: ""  #NETBIOS name for the Active Directory Domain
-+    sid: "" #SID the Active Directory Domain
++    dnsName: "" # DNS Domain Name
++    dnsTreeName: "" # DNS Domain Name Root
++    guid: "" # GUID of Domain
++    machineAccountName: "" # Username of the GMSA account
++    netBiosName: "" # NETBIOS Domain Name
++    sid: "" # SID of Domain
  
--containerPort: "443"
--
+ containerPort: "443"
+ 
  image:
 -  repository: registry.k8s.io/gmsa-webhook/k8s-gmsa-webhook
--  tag: v0.7.0
 +  repository: rancher/mirrored-sigwindowstools-k8s-gmsa-webhook
-+  tag: v0.3.0
+   tag: v0.7.0
    imagePullPolicy: IfNotPresent
  
 -# if true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
--setPodOs: true
--
+ setPodOs: true
+ 
  global:
 -  systemDefaultRegistry: ""
 +  cattle:
@@ -51,28 +51,26 @@
 +    tag: v1.22.6
 +    pullPolicy: IfNotPresent
  
--affinity: {}
+ affinity: {}
 -nodeselector: {}
--podDisruptionBudget:
--  enabled: false
--  # minAvailable: 1
--  # maxUnavailable: 1
--
++
++nodeSelector: {}
++
+ podDisruptionBudget:
+   enabled: false
+   # minAvailable: 1
+   # maxUnavailable: 1
+ 
 -podSecurityContext: {}
--replicaCount: 2
-+## SecurityContext holds pod-level security attributes and common container settings.
-+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-+##
 +podSecurityContext:
 +  runAsNonRoot: false
 +  # Currently, required to run as root due to port binding within the container.
 +  runAsUser: 0
++
+ replicaCount: 2
++
  securityContext: {}
 -tolerations: []
  
 -
 +tolerations: []
-+podDisruptionBudget:
-+  enabled: false
-+  minAvailable:
-+  maxUnavailable:

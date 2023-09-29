@@ -1,6 +1,6 @@
 --- charts-original/templates/deployment.yaml
 +++ charts/templates/deployment.yaml
-@@ -1,11 +1,13 @@
+@@ -1,8 +1,10 @@
  apiVersion: apps/v1
  kind: Deployment
  metadata:
@@ -12,53 +12,9 @@
 +  namespace: {{ .Release.Namespace }}
    labels: {{ include "gmsa.chartref" . | nindent 4 }}
  spec:
--  replicas: {{ .Values.replicaCount }}
-+  replicas: 1
-   selector:
-     matchLabels:
-       app: {{ .Release.Name }}
-@@ -18,55 +20,49 @@
-       securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
-       {{- end }}
-       serviceAccountName: {{ .Release.Name }}
--      {{- with .Values.affinity }}
-       affinity:
--        {{- toYaml . | nindent 8 }}
--      {{- end }}
-+        nodeAffinity:
-+          requiredDuringSchedulingIgnoredDuringExecution:
-+            nodeSelectorTerms:
-+              - matchExpressions:
-+                  - key: kubernetes.io/os
-+                    operator: In
-+                    values:
-+                      - linux
-       {{- with .Values.tolerations }}
-       tolerations:
-         {{- toYaml . | nindent 8 }}
-       {{- end }}
--      nodeSelector:
--        kubernetes.io/os: linux
--      {{- with .Values.nodeSelector }}
--        {{- toYaml . | nindent 8 }}
--      {{- end }}
-       containers:
-         - name: {{ .Release.Name }}
--          image: '{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-+          image: {{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
-           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-           readinessProbe:
-             httpGet:
-               scheme: HTTPS
-               path: /health
--              port: {{ .Values.containerPort }}
-+              port: 443
-           ports:
--            - containerPort: {{ .Values.containerPort }}
-+            - containerPort: 443
-+          {{- if .Values.securityContext }}
-+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
-+          {{- end }}
+   replicas: {{ .Values.replicaCount }}
+@@ -44,29 +46,28 @@
+             - containerPort: {{ .Values.containerPort }}
            volumeMounts:
              - name: tls
 -              mountPath: "/tls"
@@ -70,12 +26,15 @@
 +              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.key
              - name: TLS_CRT
 -              value: /tls/crt
--            - name: HTTPS_PORT
--              value: "{{ .Values.containerPort }}"
++              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
+             - name: HTTPS_PORT
+               value: "{{ .Values.containerPort }}"
 -      {{- if .Values.securityContext }}
 -      securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
 -      {{- end }}
-+              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
++          {{- if .Values.securityContext }}
++          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
++          {{- end }}
        volumes:
          - name: tls
            secret:
@@ -86,9 +45,9 @@
 +                path: tls.key
                - key: tls.crt
 -                path: crt
--      {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
--      os:
--        name: linux
--      {{- end -}}
 +                path: tls.crt
- 
+       {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
+       os:
+         name: linux
+       {{- end -}}
+-

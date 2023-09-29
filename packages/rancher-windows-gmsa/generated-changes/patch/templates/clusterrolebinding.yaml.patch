@@ -1,6 +1,6 @@
 --- charts-original/templates/clusterrolebinding.yaml
 +++ charts/templates/clusterrolebinding.yaml
-@@ -7,7 +7,7 @@
+@@ -7,9 +7,8 @@
  subjects:
    - kind: ServiceAccount
      name: {{ .Release.Name }}
@@ -9,3 +9,5 @@
  roleRef:
    kind: ClusterRole
    name: {{ .Release.Name }}
+   apiGroup: rbac.authorization.k8s.io
+-

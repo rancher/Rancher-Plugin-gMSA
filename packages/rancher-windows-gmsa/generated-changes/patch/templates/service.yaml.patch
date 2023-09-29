@@ -1,6 +1,6 @@
 --- charts-original/templates/service.yaml
 +++ charts/templates/service.yaml
-@@ -2,12 +2,12 @@
+@@ -2,7 +2,7 @@
  kind: Service
  metadata:
    name: {{ .Release.Name }}
@@ -9,9 +9,8 @@
    labels: {{ include "gmsa.chartref" . | nindent 4 }}
  spec:
    ports:
-     - port: 443
--      targetPort: {{ .Values.containerPort }}
-+      targetPort: 443
+@@ -10,4 +10,3 @@
+       targetPort: {{ .Values.containerPort }}
    selector:
      app: {{ .Release.Name }}
- 
+-

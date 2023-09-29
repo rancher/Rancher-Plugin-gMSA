@@ -13,16 +13,8 @@
        {{- end }}
      rules:
        - operations: ["CREATE", "UPDATE"]
-@@ -28,10 +28,7 @@
-     # don't run on ${NAMESPACE}
-     namespaceSelector:
-       matchExpressions:
--        - key: kubernetes.io/metadata.name
-+        - key: gmsa-webhook
+@@ -34,4 +34,3 @@
+         - key: windows.k8s.io/disabled
            operator: NotIn
--          values: [{{ .Release.Namespace }}]
--        - key: windows.k8s.io/disabled
--          operator: NotIn
--          values: ["true"]
-+          values: [disabled]
- 
+           values: ["true"]
+-
