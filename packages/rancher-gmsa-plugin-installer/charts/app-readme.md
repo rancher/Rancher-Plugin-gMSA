@@ -1,8 +1,10 @@
 # Rancher gMSA CCG Plugin Installer
 
-This helm chart will install the Rancher Container Credential Guard Plugin onto all Windows nodes. This plugin is invoked by the Windows Container Credential Guard during the non-domain-joined gMSA authorization process. This plugin requires that the Rancher gMSA Account Provider is also installed onto the cluster. 
+Rancher GMSA Plugin Installer is a **utility chart** that can be deployed onto a Windows cluster to install the Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin) onto your Windows hosts.
 
-Only one instance of this chart needs to be installed per cluster in order to install the Plugin onto all Windows workers. 
+This plugin is invoked by the Windows Container Credential Guard during the [non-domain-joined gMSA authorization process](https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/manage-serviceaccounts#gmsa-architecture-and-improvements).
+
+Once installed, the plugin also requires you to deploy the Rancher gMSA Account Provider onto the cluster.
 
 ## Prerequisites
 

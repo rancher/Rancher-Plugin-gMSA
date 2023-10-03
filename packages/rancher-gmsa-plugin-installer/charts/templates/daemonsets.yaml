@@ -1,0 +1,77 @@
+{{- $actions := list "install" "uninstall" -}}
+{{- range $_, $action := $actions }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+  namespace: {{ template "rancher-gmsa-plugin-installer.namespace" $ }}
+  labels: {{ include "rancher-gmsa-plugin-installer.labels" $ | nindent 4 }}
+    app: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+{{- if eq $action "uninstall" }}
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "1"
+{{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+      release: {{ $.Release.Name | quote }}
+  template:
+    metadata:
+      labels: {{ include "rancher-gmsa-plugin-installer.labels" $ | nindent 8 }}
+        app: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+    spec:
+      hostNetwork: true
+      {{- if $.Values.securityContext }}
+      securityContext: {{ toYaml $.Values.securityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        kubernetes.io/os: windows
+      {{- with $.Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: {{ $action }}er
+          args:
+            - "{{ $action }}"
+          imagePullPolicy: {{ $.Values.image.imagePullPolicy }}
+          image: "{{ template "system_default_registry" $ }}{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          {{- if $.Values.securityContext }}
+          securityContext: {{ toYaml $.Values.securityContext | nindent 12 }}
+          {{- end }}
+      containers:
+        - name: pause
+          imagePullPolicy: {{ $.Values.pause.image.imagePullPolicy }}
+          image: "{{ template "system_default_registry" (set ($ | deepCopy) "imageOverride" $.Values.pause.image) }}{{ $.Values.pause.image.repository }}:{{ $.Values.pause.image.tag }}"
+          command: {{ toYaml $.Values.pause.command | nindent 12 }}
+          securityContext: {{ toYaml $.Values.securityContext | nindent 12 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+  namespace: {{ template "rancher-gmsa-plugin-installer.namespace" $ }}
+  labels: {{ include "rancher-gmsa-plugin-installer.labels" $ | nindent 4 }}
+    app: {{ template "rancher-gmsa-plugin-installer.name" $ }}-{{ $action }}
+{{- if eq $action "uninstall" }}
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+{{- end }}
+{{- if $.Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml $.Values.global.imagePullSecrets | nindent 2 }}
+{{- end }}
+{{- end }}

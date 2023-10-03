@@ -31,7 +31,7 @@ function build-binaries() {
    fi
    printf "Building for ${1}-${2} ...\n"
 
-   GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/ccg-plugin-manager-${1}-${2}${TEMP_SUFFIX} ./cmd/ccg-plugin-manager
+   GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/ccg-plugin-installer-${1}-${2}${TEMP_SUFFIX} ./cmd/ccg-plugin-installer
    GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/gmsa-account-provider-${1}-${2}${TEMP_SUFFIX} ./cmd/gmsa-account-provider
 
    printf "Successfully built for ${1}-${2} ...\n"
