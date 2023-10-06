@@ -3,6 +3,6 @@ FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION}
 ARG OS
 ARG ARCH
 
-COPY dist/artifacts/ccg-plugin-manager-${OS}-${ARCH}.exe ./main.exe
+COPY dist/ccg-plugin-installer-${OS}-${ARCH}.exe ./main.exe
 
 ENTRYPOINT ["main.exe"]

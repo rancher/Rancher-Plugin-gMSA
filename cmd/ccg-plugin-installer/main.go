@@ -15,7 +15,7 @@ var (
 
 func main() {
 	cmd := &cobra.Command{
-		Use:     "ccg-plugin-manager",
+		Use:     "ccg-plugin-installer",
 		Version: version.FriendlyVersion(),
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
