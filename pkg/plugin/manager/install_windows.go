@@ -18,11 +18,11 @@ func Install() error {
 	}
 
 	if directoryExists && fileExists && CCGEntryExists && ClassesRootKeyExists {
-		logrus.Info("plugin already installed")
+		logrus.Info("Plugin already installed")
 		return nil
 	}
 
-	logrus.Info("beginning installation")
+	logrus.Info("Beginning installation")
 
 	if !fileExists {
 		err = writeArtifacts()

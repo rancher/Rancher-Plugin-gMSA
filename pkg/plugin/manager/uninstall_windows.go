@@ -48,13 +48,7 @@ func Uninstall() error {
 		}
 	}
 
-	// write cleanup script to host
-	err = os.WriteFile(cleanUpScriptFilePath(), cleanup, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("failed to write cleanup script to host: %v", err)
-	}
-
-	logrus.Infof("Removal successful! To removal all account provider artifacts please run %s manually", fmt.Sprintf("%s\\%s", baseDir, cleanupFileName))
+	logrus.Infof("Uninstall successful!")
 
 	return nil
 }
@@ -96,5 +90,12 @@ func deleteArtifacts() bool {
 			break
 		}
 	}
+
+	err := os.RemoveAll(baseDir)
+	if err != nil {
+		logrus.Errorf("failed to remove base gmsa directory %s: %v", baseDir, err)
+		return false
+	}
+
 	return successfulRemoval
 }

@@ -15,5 +15,5 @@ func Uninstall() error {
 }
 
 func Upgrade() error {
-	return fmt.Errorf("cannot uninstall plugin: not a Windows host")
+	return fmt.Errorf("cannot upgrade plugin: not a Windows host")
 }

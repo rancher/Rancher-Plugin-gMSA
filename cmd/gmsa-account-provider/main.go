@@ -1,20 +1,45 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	_ "net/http/pprof"
-
 	pkg "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 var (
 	debugConfig command.DebugConfig
 )
+
+func main() {
+	cmd := &cobra.Command{
+		Use:     "gmsa-account-provider",
+		Version: version.FriendlyVersion(),
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
+	}
+
+	cmd.AddCommand(
+		command.AddDebug(command.Command(&GMSAAccountProvider{}, cobra.Command{
+			Use:          "run",
+			Short:        "Start the account provider api",
+			SilenceUsage: true,
+		}), &debugConfig),
+		command.AddDebug(command.Command(&GMSAAccountProviderUninstaller{}, cobra.Command{
+			Use:          "uninstall",
+			Short:        "Remove all files and certificates for the account provider instance",
+			SilenceUsage: true,
+		}), &debugConfig),
+	)
+
+	command.Main(cmd)
+}
 
 type GMSAAccountProvider struct {
 	Kubeconfig    string `usage:"Kubeconfig file" env:"KUBECONFIG"`
@@ -83,10 +108,13 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 }
 
-func main() {
-	cmd := command.Command(&GMSAAccountProvider{}, cobra.Command{
-		Version: version.FriendlyVersion(),
-	})
-	cmd = command.AddDebug(cmd, &debugConfig)
-	command.Main(cmd)
+type GMSAAccountProviderUninstaller struct {
+	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
+}
+
+func (a *GMSAAccountProviderUninstaller) Run(cmd *cobra.Command, _ []string) error {
+	if a.Namespace == "" {
+		return fmt.Errorf("rancher-gmsa-account-provider can only be uninstalled in a single namespace")
+	}
+	return pkg.UninstallProvider(a.Namespace)
 }

@@ -80,7 +80,3 @@ func installScriptFilePath() string {
 func uninstallScriptFilePath() string {
 	return fmt.Sprintf("%s\\%s", baseDir, uninstallFileName)
 }
-
-func cleanUpScriptFilePath() string {
-	return fmt.Sprintf("%s\\%s", baseDir, cleanupFileName)
-}

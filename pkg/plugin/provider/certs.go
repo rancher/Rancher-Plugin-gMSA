@@ -105,6 +105,7 @@ func getCertFiles(activeDirectoryName string) []certFile {
 		},
 	}
 }
+
 func WriteCerts(namespace string) error {
 	if runtime.GOOS != "windows" {
 		logrus.Warn("Not running on a Windows system, will not write certificates to system")
@@ -169,6 +170,8 @@ func generateAndImportPfx(file certFile, namespace string) error {
 	if err != nil {
 		return fmt.Errorf("error removing keyfile for file %s", file.hostFile)
 	}
+
+	// todo; should we also get rid of the cert?
 	return nil
 }
 
@@ -180,6 +183,55 @@ func importCertificate(file certFile) error {
 		return fmt.Errorf("failed to add certificate to LocalMachine Root store (%s): %v", cmd.String(), err)
 	}
 	logrus.Debug(string(out))
+	return nil
+}
+
+func RemoveCerts(namespace string) error {
+	if runtime.GOOS != "windows" {
+		logrus.Warn("Not running on a Windows system, no certificates to remove")
+		return nil
+	}
+	for _, file := range getCertFiles(namespace) {
+		if file.isKey {
+			// keys aren't directly imported, so they won't appear in the cert store
+			continue
+		}
+		if err := UnImportCertificate(file, namespace); err != nil {
+			return fmt.Errorf("error encountered removing certificate %s from store: %v", file.hostFile, err)
+		}
+	}
+	return nil
+}
+
+func UnImportCertificate(file certFile, namespace string) error {
+	dynamicDir := fmt.Sprintf("%s/%s", gmsaDirectory, namespace)
+
+	// get cert thumbprint using certutil. Thumbprints are equal to the sha1 hash of the certificate
+	certUtilArgs := []string{"-Command",
+		fmt.Sprintf("$(certutil %s)", file.hostFile), "-like", "\"Cert Hash(sha1):*\""}
+
+	o, err := exec.Command("powershell", certUtilArgs...).Output()
+	if err != nil {
+		return fmt.Errorf("failed to obtain sha1 thumbPrint of cert in %s: %v", dynamicDir, err)
+	}
+
+	thumb := strings.Split(string(o), " ")
+	if len(thumb) != 2 {
+		return fmt.Errorf("encountered error determining thumbprint of %s, certutil did not return properly formatted hash: %s", file.hostFile, string(o))
+	}
+	thumbPrint := thumb[1]
+
+	// unimport the cert via its thumbprint
+	pwshArgs := []string{"-Command",
+		"Get-ChildItem", fmt.Sprintf("Cert:\\LocalMachine\\Root\\%s", thumbPrint), "|", "Remove-Item"}
+
+	o, err = exec.Command("powershell", pwshArgs...).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to remove certificate %s: %v", file.hostFile, err)
+	}
+
+	logrus.Infof("successfully removed %s", file.hostFile)
+
 	return nil
 }
 
@@ -195,6 +247,10 @@ func pfxClean(namespace string) error {
 }
 
 func pfxConvert(file certFile) error {
+	// todo; gen random password and ensure things still work
+	//	 since we import the cert into the store i think we don't really need
+	//   to keep track of the actual password (?)
+	//	 we just need to gen it and use it during conversion and import, but idk after that
 	cmd := exec.Command("powershell", "-Command", "cd", file.hostDir, ";", "certutil", "-p", "\"password\"", "-MergePFX", "tls.crt", "tls.pfx")
 	logrus.Debugf("generating PFX certFile: %s\n", cmd.String())
 	out, err := cmd.CombinedOutput()

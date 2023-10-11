@@ -15,9 +15,6 @@ var installer []byte
 //go:embed uninstall-plugin.ps1
 var uninstaller []byte
 
-//go:embed cleanup.ps1
-var cleanup []byte
-
 const (
 	// baseDir is where we expect the dll to live
 	baseDir = "C:\\Program Files\\RanchergMSACredentialProvider"
@@ -28,7 +25,6 @@ const (
 
 	installFileName   = "install-plugin.ps1"
 	uninstallFileName = "uninstall-plugin.ps1"
-	cleanupFileName   = "cleanup-gmsa-plugin.ps1"
 
 	dllFileName    = "RanchergMSACredentialProvider.dll"
 	oldDllFileName = "out-dated-version-RanchergMSACredentialProvider.dll"
