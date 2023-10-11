@@ -4,12 +4,10 @@ import (
 	pkg "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"fmt"
-	"net/http"
-	_ "net/http/pprof"
+	"strings"
 )
 
 var (
@@ -50,16 +48,14 @@ type GMSAAccountProvider struct {
 
 func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	if a.Namespace == "" {
+		return fmt.Errorf("gmsa-account-provider must be started within a kubernetes namespace")
+	}
+
+	if len(strings.Split(a.Namespace, " ")) > 1 {
 		return fmt.Errorf("rancher-gmsa-account-provider can only be started in a single namespace")
 	}
 
-	// pprof and cli debug
-	go func() {
-		err := http.ListenAndServe("localhost:6060", nil)
-		if err != nil {
-			logrus.Errorf("could not start pprof: %v", err)
-		}
-	}()
+	// cli debug
 	debugConfig.MustSetupDebug()
 
 	client, err := pkg.NewClient(a.Namespace, a.Kubeconfig)
@@ -114,7 +110,12 @@ type GMSAAccountProviderUninstaller struct {
 
 func (a *GMSAAccountProviderUninstaller) Run(cmd *cobra.Command, _ []string) error {
 	if a.Namespace == "" {
-		return fmt.Errorf("rancher-gmsa-account-provider can only be uninstalled in a single namespace")
+		return fmt.Errorf("gmsa-account-provider must be started within a kubernetes namespace")
 	}
+
+	if len(strings.Split(a.Namespace, " ")) > 1 {
+		return fmt.Errorf("rancher-gmsa-account-provider can only be started in a single namespace")
+	}
+
 	return pkg.UninstallProvider(a.Namespace)
 }
