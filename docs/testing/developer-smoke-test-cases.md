@@ -63,7 +63,12 @@ Each test may utilize the same gMSA workload to verify the proper function of th
 Sample gMSA Workload
 </summary>
 
-The below yaml can be used to deploy a workload utilizing a gMSA account. Several fields must be modified in accordance with your Active Directory environment. The workload uses a `windows/servercore` base image, to leverage the Active Directory authentication apis. The `servercore` base image is ~4GB (!). Expect a lengthy image pull time the first time you deploy this workload; grab a drink, relax. 
+The below yaml can be used to deploy a workload utilizing a gMSA account. Several fields must be modified in accordance with your Active Directory environment. The workload uses a `windows/servercore` base image, to leverage the Active Directory authentication apis. 
+
+> *Note*
+> The service created by this workload will not be accessible via the Rancher UI, you must directly connect to the NodeIP in your browser. For most test scenarios, using the UI is not required to determine if the pod has successfully assumed the role of a gMSA account. 
+
+The `servercore` base image is ~4GB (!). Expect a lengthy image pull time the first time you deploy this workload; grab a drink, relax.
 
 ```yaml 
 ---
@@ -159,7 +164,7 @@ spec:
       targetPort: 80
   selector:
     app: gmsa-demo
-  type: LoadBalancer
+  type: NodePort
 
 ```
 
@@ -204,9 +209,7 @@ After initial installation, the following files should exist on each host:
 `C:\Program Files\RanchergMSACredentialProvider\install-plugin.ps1`
 
 ## Expected Files For The Plugin Installer Post Uninstall
-After uninstallation, the following files should exist on the host. All other files written during installation should _not_ exist. 
-
-`C:\Program Files\RanchergMSACredentialProvider\cleanup.ps1`
+After uninstallation of the chart, all of the above files should no longer exist
 
 ## Expected Files For The Account Provider Post Install
 
@@ -223,4 +226,5 @@ After installation, the following files should exist on the host:
 `/var/lib/rancher/gmsa/<NAMESPACE>/ssl/ca/tls.crt`
 `/var/lib/rancher/gmsa/<NAMESPACE>/ssl/ca/ca.crt`
 
-These files will persist after uninstallation of the account provider. To clean up these files and directories, the Rancher gMSA Plugin Installer must be used to uninstall the plugin, at which point manually running the `cleanup.ps1` script will remove all references of the feature from the host. These files many also be manually deleted without uninstalling the plugin.
+## Expected Files For The Account Provider Post Uninstall
+All the previously listed files should no longer exist once the Account Provider chart is uninstalled from the cluster 

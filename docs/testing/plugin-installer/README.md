@@ -9,6 +9,8 @@ The four files written to disk are:
 3. `uninstall-plugin.ps1` is an additional PowerShell script responsible for unregistering and removing the CCG Plugin DLL from the host.
 4. `cleanup.ps1` is a cleanup script which must be manually run to remove all traces of the Rancher gMSA Account Provider from a host. 
 
+> **Note:**
+> Registry keys in the below sections are abbreviated. `HKLM` is shown as `HK_LOCAL_MACHINE` in the registry editor, and `HKCR` is shown as `HKEY_CLASSES_ROOT`
 
 Detailed Host Modifications 
 ---
@@ -28,9 +30,6 @@ Debugging Plugin Installation
 
 the plugin installer contains logic to verify if the plugin is already installed on a host, as well as if the installation completed successfully. However, if you wish to verify a proper installation manually, the following should be done: 
 
-> **Note:** 
-> Registry keys in the below steps are abbreviated. `HKLM` is shown as 'HK_LOCAL_MACHINE' in the registry editor, and `HKCR` is shown as `HKEY_CLASSES_ROOT`
-
 1. Ensure that the `C:\Program Files\RanchergMSACredentialProvider` directory exists using File Explorer or PowerShell
 2. Ensure that the `RanchergMSACredentialProvider.dll` file exists in the directory 
 3. Ensure that the `RanchergMSACredentialProvider.tlb` file exists in the directory
@@ -41,7 +40,7 @@ the plugin installer contains logic to verify if the plugin is already installed
    2. `HKLM:SYSTEM\CurrentControlSet\Control\CCG\COMClasses\{e4781092-f116-4b79-b55e-28eb6a224e26}`
       1. If this key is missing then `install-plugin.ps1` likely failed to acquire permissions to modify the registry.
 
-Debugging Plugin Installation
+Debugging Plugin Uninstallation
 ---
 1. Ensure that the `C:\Program Files\RanchergMSACredentialProvider` directory exists using File Explorer or PowerShell
 2. Ensure that the `RanchergMSACredentialProvider.dll` file no longer exists in the directory
