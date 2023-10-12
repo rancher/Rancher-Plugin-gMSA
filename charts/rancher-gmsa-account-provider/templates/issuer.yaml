@@ -12,12 +12,13 @@ spec:
 {{ template "cert-manager.apiversion" . }}
 kind: Certificate
 metadata:
-  name: {{ .Release.Name }}-root-cert
+  name: root-cert
   namespace: {{ .Release.Namespace }}
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
 spec:
+  duration: 87600h
   isCA: true
-  secretName: {{ .Release.Name }}-root-cert
+  secretName: root-cert
   commonName: {{.Release.Name}}-gMSA-Root-Certificate
   privateKey:
     algorithm: RSA
@@ -35,11 +36,8 @@ metadata:
   name: {{ .Release.Name }}-root-issuer
   namespace: {{ .Release.Namespace }}
 spec:
-  subject:
-    organizations:
-      - rancher-gmsa-{{ .Release.Name }}
   ca:
-    secretName: {{ .Release.Name }}-root-cert
+    secretName: root-cert
 
 ---
 
@@ -50,6 +48,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
 spec:
+  duration: 87600h
   subject:
     organizations:
       - rancher-gmsa-{{ .Release.Name }}
@@ -72,6 +71,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
 spec:
+  duration: 87600h
   subject:
     organizations:
       - rancher-gmsa-{{ .Release.Name }}

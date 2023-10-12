@@ -1,6 +1,6 @@
 Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin)
 ========
-##### Current Status: **Experimental**
+##### Current Status: **_Experimental_**
 
 The Container Credential Guard Rancher Kubernetes Cluster Plugin (CCGRKC Plugin) retrieves group managed service account (gMSA) credentials stored on a Kubernetes cluster to facilitate the domain-joined process.
 

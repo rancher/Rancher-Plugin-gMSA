@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 			Secrets: createMockClient(),
 		},
 	}
-	mockServ.Engine = NewGinServer(mockServ)
+	mockServ.Engine = NewGinServer(mockServ, true)
 	m.Run()
 }
 

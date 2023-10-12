@@ -18,11 +18,11 @@ func Install() error {
 	}
 
 	if directoryExists && fileExists && CCGEntryExists && ClassesRootKeyExists {
-		logrus.Info("plugin already installed")
+		logrus.Info("Plugin already installed")
 		return nil
 	}
 
-	logrus.Info("beginning installation")
+	logrus.Info("Beginning installation")
 
 	if !fileExists {
 		err = writeArtifacts()
@@ -48,7 +48,7 @@ func Install() error {
 	}
 
 	if !fileExists {
-		logrus.Infof("error encountered during installation: file %s does not exist", fmt.Sprintf("%s\\%s", baseDir, dllFileName))
+		logrus.Infof("error encountered during installation: file %s does not exist", dllFilePath())
 		successfullyInstalled = false
 	}
 
@@ -62,9 +62,11 @@ func Install() error {
 		successfullyInstalled = false
 	}
 
-	if successfullyInstalled {
-		logrus.Info("Installation successful!")
+	if !successfullyInstalled {
+		return fmt.Errorf("failed to install plugin")
 	}
+
+	logrus.Info("Installation successful!")
 
 	return nil
 }
@@ -76,13 +78,13 @@ func writeArtifacts() error {
 	}
 	logrus.Infof("successfully created base directory %s", baseDir)
 
-	err = os.WriteFile(fmt.Sprintf("%s\\%s", baseDir, dllFileName), dll, os.ModePerm)
+	err = os.WriteFile(dllFilePath(), dll, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to write dll file: %v", err)
 	}
 	logrus.Infof("successfully wrote plugin dll to disk")
 
-	err = os.WriteFile(fmt.Sprintf("%s\\%s", baseDir, installFileName), installer, os.ModePerm)
+	err = os.WriteFile(installScriptFilePath(), installer, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to write install script: %v", err)
 	}
@@ -93,7 +95,7 @@ func writeArtifacts() error {
 
 func executeInstaller() error {
 	// run installation command
-	cmd := exec.Command("powershell.exe", "-File", fmt.Sprintf("%s\\%s", baseDir, installFileName))
+	cmd := exec.Command("powershell.exe", "-File", installScriptFilePath())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		logrus.Info(string(out))

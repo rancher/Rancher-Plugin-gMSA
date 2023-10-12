@@ -15,13 +15,6 @@ var installer []byte
 //go:embed uninstall-plugin.ps1
 var uninstaller []byte
 
-//go:embed cleanup.ps1
-var cleanup []byte
-
-// Some useful docs regarding upgrades
-//  https://serverfault.com/questions/503721/replacing-dll-files-while-the-application-is-running
-//	https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-updates
-
 const (
 	// baseDir is where we expect the dll to live
 	baseDir = "C:\\Program Files\\RanchergMSACredentialProvider"
@@ -32,10 +25,10 @@ const (
 
 	installFileName   = "install-plugin.ps1"
 	uninstallFileName = "uninstall-plugin.ps1"
-	cleanupFileName   = "cleanup-gmsa-plugin.ps1"
 
-	dllFileName = "RanchergMSACredentialProvider.dll"
-	tlbFileName = "RanchergMSACredentialProvider.tlb"
+	dllFileName    = "RanchergMSACredentialProvider.dll"
+	oldDllFileName = "out-dated-version-RanchergMSACredentialProvider.dll"
+	tlbFileName    = "RanchergMSACredentialProvider.tlb"
 )
 
-// see install_windows.go and uninstall_windows.go for further implementation
+// see install_windows.go, uninstall_windows.go, and upgrade_windows.go for further implementation

@@ -36,11 +36,10 @@ spec:
           env:
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
-      # projected volumes behave differently on Windows, so we don't use them here https://kubernetes.io/docs/concepts/storage/projected-volumes/#windows
       volumes:
         - name: root-ca
           secret:
-            secretName: {{ .Release.Name }}-root-cert
+            secretName: root-cert
         - name: server-cert
           secret:
             secretName: {{ .Values.certificates.serverSecretName }}

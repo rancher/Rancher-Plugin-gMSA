@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/manager"
@@ -17,7 +15,7 @@ var (
 
 func main() {
 	cmd := &cobra.Command{
-		Use:     "ccg-plugin-manager",
+		Use:     "ccg-plugin-installer",
 		Version: version.FriendlyVersion(),
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
@@ -34,6 +32,11 @@ func main() {
 			Short:        "Uninstall the Rancher CCG Plugin",
 			SilenceUsage: true,
 		}), &debugConfig),
+		command.AddDebug(command.Command(&CCGPluginUpgrader{}, cobra.Command{
+			Use:          "upgrade",
+			Short:        "Upgrade the Rancher CCG Plugin",
+			SilenceUsage: true,
+		}), &debugConfig),
 	)
 	command.Main(cmd)
 }
@@ -42,9 +45,6 @@ type CCGPluginInstaller struct {
 }
 
 func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
 	debugConfig.MustSetupDebug()
 
 	return manager.Install()
@@ -54,10 +54,16 @@ type CCGPluginUninstaller struct {
 }
 
 func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
 	debugConfig.MustSetupDebug()
 
 	return manager.Uninstall()
+}
+
+type CCGPluginUpgrader struct {
+}
+
+func (i *CCGPluginUpgrader) Run(_ *cobra.Command, _ []string) error {
+	debugConfig.MustSetupDebug()
+
+	return manager.Upgrade()
 }

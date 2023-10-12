@@ -1,5 +1,7 @@
 # Rancher gMSA Account Provider
-This helm chart will deploy the Rancher gMSA Account Provider API as a daemon set across all Windows worker nodes. Only one instance of the Rancher gMSA Account Provider API can be deployed to a given namespace. In cases where multiple Account Provider APIs are required, individual namespaces must be created per provider. 
+This helm chart will deploy the Rancher gMSA Account Provider API as a daemon set across all Windows worker nodes.
+
+Only one instance of the Rancher gMSA Account Provider API can be deployed to a given namespace. In cases where multiple Account Provider APIs are required, individual namespaces must be created per provider. 
 
 The Rancher gMSA Account Provider assists the `Rancher gMSA Container Credential Guard Plugin` in the non-domain-joined gMSA authorization process. The Account Provider deploys an HTTP/s API running as `hostProcess` pod on all Windows workers. As workloads utilizing gMSA accounts are created, the 'Rancher gMSA Container Credential Guard Plugin' will query the Account Provider API to obtain Active Directory Domain login information. All Domain login information is stored as secrets within the cluster, allowing for native Kubernetes management of credentials.  
 

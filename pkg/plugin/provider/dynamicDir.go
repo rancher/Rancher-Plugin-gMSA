@@ -39,6 +39,17 @@ func CreateDynamicDirectory(namespace string) error {
 	return nil
 }
 
+func RemoveDynamicDirectory(namespace string) error {
+	subDirectory := fmt.Sprintf("%s/%s", gmsaDirectory, namespace)
+	if _, err := os.Stat(subDirectory); !os.IsNotExist(err) {
+		err = os.RemoveAll(subDirectory)
+		if err != nil {
+			return fmt.Errorf("error encountered removing subdirectory %s: %v", subDirectory, err)
+		}
+	}
+	return nil
+}
+
 func WritePortFile(namespace, port string) error {
 	portFile := fmt.Sprintf("%s/%s/%s", gmsaDirectory, namespace, "port.txt")
 	// TODO: adjust file permissions

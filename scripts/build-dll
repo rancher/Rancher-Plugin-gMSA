@@ -18,7 +18,7 @@ function build-dll() {
   fi
 
   # build the DLL in a container so we don't have to install .NET SDK's on the runner
-  docker build -f package/ccg-plugin-installer/Dockerfile.builder.windows -t rancher/gmsa-ccg-plugin-builder  .
+  docker build --no-cache -f package/ccg-plugin-installer/Dockerfile.builder.windows -t rancher/gmsa-ccg-plugin-builder  .
   docker create --name dllbuild rancher/gmsa-ccg-plugin-builder:latest
 
   # cp the resulting artifact into the manager directory so we can embed the file on build
