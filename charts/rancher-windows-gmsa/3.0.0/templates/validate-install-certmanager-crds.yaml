@@ -1,0 +1,16 @@
+#{{- if gt (len (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "")) 0 -}}
+# {{- $found := dict -}}
+# {{- $apiVersion := trim (mustRegexReplaceAll "apiVersion: (.*)" (include "cert-manager.apiversion" .) "$1") -}}
+# {{- set $found (printf "%s/Certificate" $apiVersion) false -}}
+# {{- set $found (printf "%s/Issuer" $apiVersion) false -}}
+# {{- range .Capabilities.APIVersions -}}
+# {{- if hasKey $found (toString .) -}}
+# 	{{- set $found (toString .) true -}}
+# {{- end -}}
+# {{- end -}}
+# {{- range $_, $exists := $found -}}
+# {{- if (eq $exists false) -}}
+# 	{{- required "Required CRDs are missing. Please install cert-manager before installing this chart." "" -}}
+# {{- end -}}
+# {{- end -}}
+#{{- end -}}

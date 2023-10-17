@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "1"
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+      release: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 8 }}
+        app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+    spec:
+      hostNetwork: true
+      {{- if .Values.securityContext }}
+      securityContext: {{ toYaml .Values.securityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        kubernetes.io/os: windows
+      {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: account-provider-cleanup
+          args:
+          - "cleanup"
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          env:
+            - name: NAMESPACE
+              value: {{ template "rancher-gmsa-account-provider.namespace" . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
+{{- end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels:
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "1"
+spec:
+  template:
+    metadata:
+      name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+      labels:
+        app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+    spec:
+      serviceAccountName: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      restartPolicy: Never
+      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }}
+      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }}
+{{- if .Values.certificates.certManager.enabled }}
+      initContainers:
+      - name: cleanup-secrets-job
+        image: {{ template "system_default_registry" . }}{{ .Values.global.kubectl.repository }}:{{ .Values.global.kubectl.tag }}
+        imagePullPolicy: {{ .Values.global.kubectl.pullPolicy }}
+        command: ["kubectl", "delete", "secret", "{{ .Values.certificates.caSecretName }}", "{{ .Values.certificates.clientSecretName }}", "{{ .Values.certificates.serverSecretName }}"]
+        args: ["-n", "{{ template "rancher-gmsa-account-provider.namespace" . }}"]
+{{- end }}
+      containers:
+      - name: cleanup-job
+        image: {{ template "system_default_registry" . }}{{ .Values.global.kubectl.repository }}:{{ .Values.global.kubectl.tag }}
+        imagePullPolicy: {{ .Values.global.kubectl.pullPolicy }}
+        command: ["kubectl", "rollout", "status", "daemonset", "{{ template "rancher-gmsa-account-provider.name" . }}-cleanup"]
+        args: ["-n", "{{ template "rancher-gmsa-account-provider.namespace" . }}"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  labels:
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+{{- if .Values.certificates.certManager.enabled }}
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  resourceNames:
+  - {{ .Values.certificates.caSecretName }}
+  - {{ .Values.certificates.clientSecretName }}
+  - {{ .Values.certificates.serverSecretName }}
+  verbs:
+  - get
+  - list
+  - watch
+  - delete
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  labels:
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+subjects:
+- kind: ServiceAccount
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels:
+    app: {{ template "rancher-gmsa-account-provider.name" . }}-cleanup-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
+{{- end }}

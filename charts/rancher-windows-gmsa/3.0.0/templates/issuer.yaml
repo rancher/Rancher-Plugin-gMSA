@@ -22,5 +22,4 @@ metadata:
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
 spec:
   selfSigned: {}
-{{- end -}}
-
+{{- end }}

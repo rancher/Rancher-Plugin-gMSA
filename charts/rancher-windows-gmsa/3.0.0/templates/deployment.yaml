@@ -7,7 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}
@@ -20,33 +20,30 @@ spec:
       securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ .Release.Name }}
+      {{- with .Values.affinity }}
       affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/os
-                    operator: In
-                    values:
-                      - linux
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      nodeSelector:
+        kubernetes.io/os: linux
+      {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Release.Name }}
-          image: {{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
+          image: '{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}'
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           readinessProbe:
             httpGet:
               scheme: HTTPS
               path: /health
-              port: 443
+              port: {{ .Values.containerPort }}
           ports:
-            - containerPort: 443
-          {{- if .Values.securityContext }}
-          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
-          {{- end }}
+            - containerPort: {{ .Values.containerPort }}
           volumeMounts:
             - name: tls
               mountPath: "/etc/ssl/rancher-windows-gmsa-webhook"
@@ -56,6 +53,11 @@ spec:
               value: /etc/ssl/rancher-windows-gmsa-webhook/tls.key
             - name: TLS_CRT
               value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
+            - name: HTTPS_PORT
+              value: "{{ .Values.containerPort }}"
+          {{- if .Values.securityContext }}
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
       volumes:
         - name: tls
           secret:
@@ -65,4 +67,7 @@ spec:
                 path: tls.key
               - key: tls.crt
                 path: tls.crt
-
+      {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
+      os:
+        name: linux
+      {{- end }}

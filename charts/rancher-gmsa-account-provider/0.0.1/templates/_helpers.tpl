@@ -1,15 +1,77 @@
 # Rancher
-
 {{- define "system_default_registry" -}}
 {{- if .Values.global.cattle.systemDefaultRegistry -}}
 {{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
+{{- else -}}
+{{ template "windows_default_registry" . }}
 {{- end -}}
 {{- end -}}
 
-{{/* Create chart name and version as used by the chart label. */}}
-{{- define "gmsa.chartref" -}}
-chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+# Windows Support
+
+{{- define "windows_default_registry" -}}
+{{- $image := default .Values.image (get . "imageOverride") -}}
+{{- if has $image.repository (list "windows/servercore" "windows/nanoserver" "windows/server" "windows" "windows/servercore/iis" "oss/kubernetes/windows-host-process-containers-base-image") -}}
+{{- printf "%s/" "mcr.microsoft.com" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Windows cluster will add default taint for linux nodes,
+add below linux tolerations to workloads could be scheduled to those linux nodes
+*/}}
+
+{{- define "linux-node-tolerations" -}}
+- key: "cattle.io/os"
+  value: "linux"
+  effect: "NoSchedule"
+  operator: "Equal"
+{{- end -}}
+
+{{- define "linux-node-selector" -}}
+{{- if semverCompare "<1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+beta.kubernetes.io/os: linux
+{{- else -}}
+kubernetes.io/os: linux
+{{- end -}}
+{{- end -}}
+
+# Rancher GMSA Account Provider
+
+{{/* vim: set filetype=mustache: */}}
+{{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
+{{- define "rancher-gmsa-account-provider.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 50 | trimSuffix "-" -}}
 {{- end }}
+
+{{/*
+Allow the release namespace to be overridden for multi-namespace deployments in combined charts
+*/}}
+{{- define "rancher-gmsa-account-provider.namespace" -}}
+  {{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Create chart name and version as used by the chart label. */}}
+{{- define "rancher-gmsa-account-provider.chartref" -}}
+{{- replace "+" "_" .Chart.Version | printf "%s-%s" .Chart.Name -}}
+{{- end }}
+
+{{/* Generate basic labels */}}
+{{- define "rancher-gmsa-account-provider.labels" -}}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: "{{ replace "+" "_" .Chart.Version }}"
+app.kubernetes.io/part-of: {{ template "rancher-gmsa-account-provider.name" . }}
+chart: {{ template "rancher-gmsa-account-provider.chartref" . }}
+release: {{ $.Release.Name | quote }}
+heritage: {{ $.Release.Service | quote }}
+{{- end -}}
+
+# Cert Manager
 
 {{/* Determine apiVersion for cert-manager */}}
 {{- define "cert-manager.apiversion" -}}
@@ -27,21 +89,3 @@ apiVersion: cert-manager.io/v1
   {{- end }}
 {{- end }}
 
-{{- define "certificates.cabundle"}}
-{{- if gt (len (lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "")) 0 -}}
-{{- $secret := (lookup "v1" "Secret" .Release.Namespace .Values.certificates.secretName) -}}
-{{- if lt (len $secret) 1 -}}
-{{- required (printf "CA Bundle secret '%s' in namespace '%s' must exist" .Values.certificates.secretName .Release.Namespace) "" -}}
-{{- else -}}
-{{- if not (hasKey $secret "data") -}}
-{{- required (printf "CA Bundle secret '%s' in namespace '%s' is empty" .Values.certificates.secretName .Release.Namespace) "" -}}
-{{- end -}}
-{{- if or (not (hasKey $secret.data "ca.crt")) (not (hasKey $secret.data "tls.crt")) (not (hasKey $secret.data "tls.key")) -}}
-{{- required (printf "CA Bundle secret '%s' in namespace '%s' must contain ca.crt, tls.key, and tls.cert; found the following keys in the secret: %s" .Values.certificates.secretName .Release.Namespace $secret.data) "" -}}
-{{- end -}}
-{{- end -}}
-{{- get $secret.data "ca.crt" }}
-{{- else -}}
-INSERT_CERTIFICATE_FROM_SECRET
-{{- end -}}
-{{- end }}
