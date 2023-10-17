@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)/..
+
+# Execute in tests/ directory
+pushd tests 1>/dev/null
+trap "popd 1>/dev/null" EXIT
+
+echo Running chart tests
+go test -count=1 -cover -tags=test ./...

@@ -8,6 +8,13 @@ RUN if [ "${ARCH}" == "amd64" ]; then \
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.51.2; \
     fi
 
+RUN zypper --non-interactive install tar python3 python3-pip
+
+# Install YAMLLint for Hull
+ARG yamllint_version=1.26.3
+LABEL yamllint_version=$yamllint_version
+RUN pip install "yamllint==$yamllint_version"
+
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
 ENV DAPPER_SOURCE /go/src/github.com/rancher/Rancher-Plugin-gMSA/
 ENV DAPPER_OUTPUT ./bin ./dist
