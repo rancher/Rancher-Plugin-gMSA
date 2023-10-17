@@ -1,0 +1,11 @@
+--- charts-original/templates/validatingwebhook.yaml
++++ charts/templates/validatingwebhook.yaml
+@@ -15,7 +15,7 @@
+         namespace: {{ .Release.Namespace }}
+         path: "/validate"
+       {{- if not (.Values.certificates.certManager.enabled) }}
+-      caBundle: {{ .Values.certificates.caBundle }}
++      caBundle: {{ template "certificates.cabundle" . }}
+       {{- end }}
+     rules:
+       - operations: ["CREATE", "UPDATE"]

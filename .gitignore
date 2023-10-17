@@ -7,7 +7,8 @@
 /Rancher-Plugin-gMSA
 .vscode/
 .DS_Store
-
+.charts-build-scripts
+/Dockerfile.dapper*
 
 # globs
 Makefile.in
@@ -266,6 +267,8 @@ PublishScripts/
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+# except packages/, which is used by charts-build-scripts
+!**/packages/*
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
@@ -292,6 +295,8 @@ _pkginfo.txt
 *.[Cc]ache
 # but keep track of directories ending in .cache
 !*.[Cc]ache/
+# except cache at the root
+/.cache
 
 # Others
 ClientBin/

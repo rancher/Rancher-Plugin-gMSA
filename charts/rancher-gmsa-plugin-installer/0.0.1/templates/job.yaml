@@ -1,0 +1,85 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  namespace: {{ template "rancher-gmsa-plugin-installer.namespace" . }}
+  labels:
+    app: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "1"
+spec:
+  template:
+    metadata:
+      name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+      labels:
+        app: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+    spec:
+      serviceAccountName: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      restartPolicy: Never
+      nodeSelector: {{ include "linux-node-selector" . | nindent 8 }}
+      tolerations: {{ include "linux-node-tolerations" . | nindent 8 }}
+      containers:
+      - name: uninstall-job
+        image: {{ template "system_default_registry" . }}{{ .Values.global.kubectl.repository }}:{{ .Values.global.kubectl.tag }}
+        imagePullPolicy: {{ .Values.global.kubectl.pullPolicy }}
+        command: ["kubectl", "rollout", "status", "daemonset", "{{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall"]
+        args: ["-n", "{{ template "rancher-gmsa-plugin-installer.namespace" . }}"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  labels:
+    app: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  labels:
+    app: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+subjects:
+- kind: ServiceAccount
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  namespace: {{ template "rancher-gmsa-plugin-installer.namespace" . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  namespace: {{ template "rancher-gmsa-plugin-installer.namespace" . }}
+  labels:
+    app: {{ template "rancher-gmsa-plugin-installer.name" . }}-uninstall-job
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": hook-succeeded, before-hook-creation
+    "helm.sh/hook-weight": "0"
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
+{{- end }}
