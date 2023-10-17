@@ -26,7 +26,7 @@
              - name: HTTPS_PORT
                value: "{{ .Values.containerPort }}"
            {{- if .Values.securityContext }}
-@@ -62,9 +64,9 @@
+@@ -62,10 +64,10 @@
              secretName: {{ .Values.certificates.secretName }}
              items:
                - key: tls.key
@@ -38,3 +38,5 @@
        {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
        os:
          name: linux
+-      {{- end -}}
++      {{- end }}
