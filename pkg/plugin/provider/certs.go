@@ -225,7 +225,7 @@ func UnImportCertificate(file certFile, namespace string) error {
 	pwshArgs := []string{"-Command",
 		"Get-ChildItem", fmt.Sprintf("Cert:\\LocalMachine\\Root\\%s", thumbPrint), "|", "Remove-Item"}
 
-	o, err = exec.Command("powershell", pwshArgs...).CombinedOutput()
+	_, err = exec.Command("powershell", pwshArgs...).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to remove certificate %s: %v", file.hostFile, err)
 	}
