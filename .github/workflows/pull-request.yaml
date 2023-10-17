@@ -13,7 +13,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: 
+    env:
+      CROSS: true
+    container:
       image: rancher/dapper:v0.5.4
     steps:
       - uses: actions/checkout@v1

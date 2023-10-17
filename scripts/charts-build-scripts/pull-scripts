@@ -29,7 +29,7 @@ if [[ ${ARCH} == "amd64" ]]; then
     # skip non-amd64 builds since rancher/charts-build-scripts does not support it yet
     curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
 fi
-if ! [[ -f bin/charts-build-scripts ]] || [[ $(cat bin/charts-build-scripts) == "Not Found" ]]; then 
+if ! [[ -f bin/charts-build-scripts ]] || [[ "$(cat bin/charts-build-scripts)" == "Not Found" ]]; then
     [[ -f bin/charts-build-scripts ]] && rm bin/charts-build-scripts; 
     
     # Fall back to old process

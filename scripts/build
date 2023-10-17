@@ -6,54 +6,34 @@ source $(dirname $0)/version
 cd $(dirname $0)/..
 
 mkdir -p bin
-
-if [ -n "${DEBUG}" ]; then
-  GCFLAGS="-N -l"
+if [ "$(uname)" = "Linux" ]; then
+    OTHER_LINKFLAGS="-extldflags -static -s"
 fi
-
 LINKFLAGS="-X github.com/rancher/Rancher-Plugin-gMSA/pkg/version.Version=$VERSION"
 LINKFLAGS="-X github.com/rancher/Rancher-Plugin-gMSA/pkg/version.GitCommit=$COMMIT $LINKFLAGS"
-if [ -z "${DEBUG}" ]; then
-  LINKFLAGS="-s -w $LINKFLAGS"
-fi
-OTHER_LINKFLAGS="-extldflags -static"
 
 function build-binaries() {
-   TEMP_LINKFLAGS=$LINKFLAGS
-   if [ $1 = "linux" ]; then
-       TEMP_LINKFLAGS="$LINKFLAGS $OTHER_LINKFLAGS"
-   fi
-
-   TEMP_SUFFIX=""
-
-   if [ ${1} = "windows" ] || [ ${1} = "Windows_NT" ]; then
-       TEMP_SUFFIX=".exe"
-   fi
-   printf "Building for ${1}-${2} ...\n"
-
-   GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/ccg-plugin-installer-${1}-${2}${TEMP_SUFFIX} ./cmd/ccg-plugin-installer
-   GOOS=${1} GOARCH=${2} CGO_ENABLED=0 go build -gcflags="all=${GCFLAGS}" -ldflags "$TEMP_LINKFLAGS" -o bin/gmsa-account-provider-${1}-${2}${TEMP_SUFFIX} ./cmd/gmsa-account-provider
-
-   printf "Successfully built for ${1}-${2} ...\n"
+  if [[ -z "$1" ]]; then
+    echo "Usage: build-binaries <app>"
+    exit 1
+  fi
+  APP=$1
+  CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP} ./cmd/${APP}
+  if [[ "$CROSS" = "true" ]]; then
+    OS_ARCH=( "linux amd64" "linux arm64" "darwin amd64" "darwin arm64" "windows amd64")
+    for os_arch in "${OS_ARCH[@]}"; do
+      local os=$(echo $os_arch | cut -d' ' -f1)
+      local arch=$(echo $os_arch | cut -d' ' -f2)
+      local suffix=${os}-${arch}
+      if [[ "${os}" == "windows" ]]; then
+        suffix="${suffix}.exe"
+      fi
+      GOOS="${os}" GOARCH="${arch}" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP}-${suffix} ./cmd/${APP}
+    done
+  fi
 }
 
-#if [ "$CROSS" = "true" ]; then
-#   # If local (host) is unset, we default to false since we are already cross-compiling for all platforms.
-#   if [ -z "$LOCAL" ]; then
-#       LOCAL="false"
-#   fi
-#   OS_ARCH=( "linux amd64" "linux arm64" "darwin amd64" "darwin arm64" "windows amd64")
-#   for i in "${OS_ARCH[@]}"; do
-#       set -- $i
-#       build-binaries ${1} ${2}
-#   done
-#elif [ "$CROSS" = "windows" ]; then
-#  build-binaries "windows" "amd64"
-#fi
-
- # Always build for the host (local) OS and ARCH unless otherwise specified (setting LOCAL to "false").
- # LOCAL will be set to "false" if CROSS is "true" (avoids compiling the host OS and ARCH twice).
- if ! [ "$LOCAL" = "false" ]; then
-     build-binaries ${OS} ${ARCH}
- fi
-
+for app in $(find ./cmd -type d -mindepth 1 -maxdepth 1 | cut -d'/' -f3); do
+  echo "Building binaries for $app..."
+  build-binaries $app
+done

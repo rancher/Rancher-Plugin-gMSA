@@ -5,8 +5,8 @@ source $(dirname $0)/version
 
 cd $(dirname $0)/..
 
-mkdir -p dist/artifacts
-cp bin/* dist/artifacts
+mkdir -p dist
+cp bin/* dist
 
 IMAGES=("gmsa-account-provider" "ccg-plugin-installer")
 NANOSERVER_VERSIONS=("ltsc2019" "ltsc2022")

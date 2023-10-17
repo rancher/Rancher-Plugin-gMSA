@@ -3,6 +3,6 @@ FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION}
 ARG OS
 ARG ARCH
 
-COPY dist/gmsa-account-provider-${OS}-${ARCH}.exe ./main.exe
+COPY dist/gmsa-account-provider-windows-${ARCH}.exe ./main.exe
 
 ENTRYPOINT ["main.exe"]
