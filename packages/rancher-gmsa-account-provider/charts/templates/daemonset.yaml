@@ -38,6 +38,8 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          args:
+            - "run"
           volumeMounts:
             - mountPath: /var/lib/rancher/gmsa/{{ template "rancher-gmsa-account-provider.namespace" . }}/container/ssl/server
               name: server-cert
