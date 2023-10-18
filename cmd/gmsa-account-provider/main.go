@@ -29,8 +29,8 @@ func main() {
 			Short:        "Start the account provider api",
 			SilenceUsage: true,
 		}), &debugConfig),
-		command.AddDebug(command.Command(&GMSAAccountProviderUninstaller{}, cobra.Command{
-			Use:          "uninstall",
+		command.AddDebug(command.Command(&GMSAAccountProviderCleanup{}, cobra.Command{
+			Use:          "cleanup",
 			Short:        "Remove all files and certificates for the account provider instance",
 			SilenceUsage: true,
 		}), &debugConfig),
@@ -104,18 +104,18 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 }
 
-type GMSAAccountProviderUninstaller struct {
+type GMSAAccountProviderCleanup struct {
 	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
 }
 
-func (a *GMSAAccountProviderUninstaller) Run(cmd *cobra.Command, _ []string) error {
+func (a *GMSAAccountProviderCleanup) Run(cmd *cobra.Command, _ []string) error {
 	if a.Namespace == "" {
-		return fmt.Errorf("gmsa-account-provider must be started within a kubernetes namespace")
+		return fmt.Errorf("gmsa-account-provider must be run within a kubernetes namespace")
 	}
 
 	if len(strings.Split(a.Namespace, " ")) > 1 {
-		return fmt.Errorf("rancher-gmsa-account-provider can only be started in a single namespace")
+		return fmt.Errorf("rancher-gmsa-account-provider can only be run within a single namespace")
 	}
 
-	return pkg.UninstallProvider(a.Namespace)
+	return pkg.CleanupProvider(a.Namespace)
 }

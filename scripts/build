@@ -18,7 +18,6 @@ function build-binaries() {
     exit 1
   fi
   APP=$1
-  CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP} ./cmd/${APP}
   if [[ "$CROSS" = "true" ]]; then
     OS_ARCH=( "linux amd64" "linux arm64" "darwin amd64" "darwin arm64" "windows amd64")
     for os_arch in "${OS_ARCH[@]}"; do
@@ -30,6 +29,12 @@ function build-binaries() {
       fi
       GOOS="${os}" GOARCH="${arch}" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP}-${suffix} ./cmd/${APP}
     done
+    else
+      if [[ "${OS}" == "windows" ]]; then
+        GOOS="${OS}" GOARCH="${ARCH}" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP}-${OS}-${ARCH}.exe ./cmd/${APP}
+      else
+        GOOS="${OS}" GOARCH="${ARCH}" CGO_ENABLED=0 go build -ldflags "$LINKFLAGS $OTHER_LINKFLAGS" -o bin/${APP}-${OS}-${ARCH} ./cmd/${APP}
+      fi
   fi
 }
 

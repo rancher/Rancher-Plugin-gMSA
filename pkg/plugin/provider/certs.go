@@ -44,7 +44,7 @@ const (
 )
 
 func createDirectory(directory string) error {
-	err := os.Mkdir(directory, os.ModePerm)
+	err := os.MkdirAll(directory, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to create directory %s: %v", directory, err)
 	}
@@ -112,6 +112,11 @@ func WriteCerts(namespace string) error {
 		return nil
 	}
 
+	logrus.Debugf("creating base certificate directory")
+	if err := createDirectory(fmt.Sprintf(hostSslDir, gmsaDirectory, namespace)); err != nil {
+		return fmt.Errorf("error encountered creating base directory'%s': %v", fmt.Sprintf(hostSslDir, gmsaDirectory, namespace), err)
+	}
+
 	files := getCertFiles(namespace)
 	for _, file := range files {
 		err := createDirectory(file.hostDir)
@@ -120,6 +125,7 @@ func WriteCerts(namespace string) error {
 		}
 	}
 
+	logrus.Debugf("writing certificates for %s", namespace)
 	for _, file := range files {
 		bytes, err := os.ReadFile(file.containerFile)
 		if err != nil {
@@ -248,9 +254,6 @@ func pfxClean(namespace string) error {
 
 func pfxConvert(file certFile) error {
 	// todo; gen random password and ensure things still work
-	//	 since we import the cert into the store i think we don't really need
-	//   to keep track of the actual password (?)
-	//	 we just need to gen it and use it during conversion and import, but idk after that
 	cmd := exec.Command("powershell", "-Command", "cd", file.hostDir, ";", "certutil", "-p", "\"password\"", "-MergePFX", "tls.crt", "tls.pfx")
 	logrus.Debugf("generating PFX certFile: %s\n", cmd.String())
 	out, err := cmd.CombinedOutput()

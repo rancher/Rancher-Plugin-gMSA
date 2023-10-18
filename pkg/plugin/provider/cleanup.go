@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func UninstallProvider(namespace string) error {
+func CleanupProvider(namespace string) error {
 	logrus.Infof("Uninstalling account provider in namespace %s", namespace)
 
 	// cleanup certs
