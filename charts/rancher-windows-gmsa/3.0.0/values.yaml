@@ -25,8 +25,8 @@ credential:
 containerPort: "443"
 
 image:
-  repository: rancher/mirrored-sigwindowstools-k8s-gmsa-webhook
-  tag: v0.3.0
+  repository: rancher/mirrored-gmsa-webhook-k8s-gmsa-webhook
+  tag: v0.7.0
   imagePullPolicy: IfNotPresent
 
 # if true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
