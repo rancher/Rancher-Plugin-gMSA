@@ -1,8 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    seccomp.security.alpha.kubernetes.io/pod: runtime/default
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels: {{ include "gmsa.chartref" . | nindent 4 }}
