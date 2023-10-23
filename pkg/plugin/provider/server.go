@@ -20,7 +20,7 @@ type HTTPServer struct {
 
 func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMTLS bool) (string, error) {
 	// use a host allocated port
-	ln, err := net.Listen("tcp", ":0")
+	ln, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return "", fmt.Errorf("failed to create http listener for http server: %v", err)
 	}
