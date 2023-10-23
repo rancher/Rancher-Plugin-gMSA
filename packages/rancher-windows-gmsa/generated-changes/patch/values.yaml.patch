@@ -9,38 +9,16 @@
    # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
    caBundle: ""
    # If cert-manager integration is disabled, upload certs data (ca.crt, tls.crt and tls.key) as k8s secretName in the namespace
-@@ -10,35 +10,52 @@
- 
- credential:
-   enabled: false
-+  hostAccountConfig: {}
-+    # pluginGUID: "" # CCG Plugin GUID
-+    # portableCcgVersion: "1" # This needs to equal the current version of CCG which right now is '1'
-+    # pluginInput: "" # Format of this field is dependent upon specific CCG Plugin
-   domainJoinConfig:
--    dnsName: ""  #DNS Domain Name
--    dnsTreeName: "" #DNS Domain Name Root
--    guid: ""  #GUID
--    machineAccountName: "" #Username of the GMSA account
--    netBiosName: ""  #NETBIOS Domain Name
--    sid: "" #SID of GMSA
-+    dnsName: "" # DNS Domain Name
-+    dnsTreeName: "" # DNS Domain Name Root
-+    guid: "" # GUID of Domain
-+    machineAccountName: "" # Username of the GMSA account
-+    netBiosName: "" # NETBIOS Domain Name
-+    sid: "" # SID of Domain
- 
+@@ -25,7 +25,7 @@
  containerPort: "443"
  
  image:
 -  repository: registry.k8s.io/gmsa-webhook/k8s-gmsa-webhook
--  tag: v0.7.0
-+  repository: rancher/mirrored-sigwindowstools-k8s-gmsa-webhook
-+  tag: v0.3.0
++  repository: rancher/mirrored-gmsa-webhook-k8s-gmsa-webhook
+   tag: v0.7.0
    imagePullPolicy: IfNotPresent
  
- # if true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
+@@ -33,16 +33,29 @@
  setPodOs: true
  
  global:
