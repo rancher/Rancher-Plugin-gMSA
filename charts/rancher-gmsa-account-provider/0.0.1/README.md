@@ -143,7 +143,53 @@ If cert-manager is not enabled, these Secrets are expected to be externally mana
 
 ### How do I identify whether the Account Provider is working as expected?
 
-TBD
+Upon installation of the Rancher gMSA Account Provider each Windows Node should have a hostProcess container running which will expose an HTTP/s API on `localhost`. This API server will listen on a port assigned to it by the host. To retrieve the port that the server is listening on, find and view the contents of the `port.txt` file located within the `/var/lib/rancher/gmsa/<ACCOUNT_PROVIDER_NAMESPACE>` directory. The API server will respond to GET requests made against the `/provider` endpoint.
+
+Before you can test the API endpoint, you must ensure that you have an [impersonation account secret](#create-an-impersonation-account-secret) created within the account provider Kubernetes namespace. You can create a test impersonation account secret within the `cattle-windows-gmsa-system` namespace using the following command 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-gmsa-impersonation-account-secret
+  namespace: cattle-windows-gmsa-system 
+type: Opaque
+data:
+  username: bXktYWQtZG9tYWluLmNvbQ== # username
+  password: cGFzc3dvcmQ= # password
+  domainName: dXNlcm5hbWU= # my-ad-domain.com
+```
+
+Once the secret has been created, you can use the following PowerShell command to test the API endpoint. This example assumes that the account provider has been installed into the `cattle-windows-gmsa-system` namespace
+
+```powershell
+$PORT = $(type C:\var\lib\rancher\gmsa\cattle-windows-gmsa-system\port.txt)
+$PFX_PATH="C:\var\lib\rancher\gmsa\cattle-windows-gmsa-system\ssl\client\tls.pfx"
+Invoke-WebRequest -Method GET -UseBasicParsing -Uri https://localhost:$PORT/provider -Certificate (Get-PfxCertificate $PFX_PATH)  -Headers @{'object' = 'test-gmsa-impersonation-account-secret'}
+```
+
+If everything has been configured properly, the command will produce an output similar to the following 
+
+```
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"username":"<username>","password":"<passowrd>","domainName":"<ad-domain-url>"}
+RawContent        : HTTP/1.1 200 OK
+                    Content-Length: 85
+                    Content-Type: application/json; charset=utf-8
+                    Date: <redacted>
+
+                    {"username":"<username>","password":"<password>","domainName":"<ad-domain-url>....
+Forms             :
+Headers           : {[Content-Length, 85], [Content-Type, application/json; charset=utf-8], [Date, <redacted>]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        :
+RawContentLength  : 85
+```
+
+If you receive a response like the above, then the account provider API is functioning as expected!
 
 ## License
 Copyright (c) 2023 [Rancher Labs, Inc.](http://rancher.com)
