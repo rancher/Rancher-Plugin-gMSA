@@ -1,0 +1,34 @@
+name: Publish-On-Merge
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    env:
+      CROSS: true
+    container:
+      image: rancher/dapper:v0.5.4
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run CI
+        run: dapper ci
+  windows-2022:
+    runs-on: windows-2022
+    env:
+      REPO: ${{ vars.REPO }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: actions/checkout@v1
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.51.2
+      - name: Run Release
+        run: bash ./scripts/release

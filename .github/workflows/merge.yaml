@@ -1,0 +1,25 @@
+name: Publish-On-Merge
+
+on:
+  push:
+    branches:
+      - main
+
+# A 2022 runner can publish images for both 2019 and 2022,
+# so we only use a single runner.
+jobs:
+  publish-windows-2022:
+    runs-on: windows-2022
+    env:
+      REPO: ${{ vars.REPO }}
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: actions/checkout@v1
+      - name: install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.51.2
+      - name: Run Release
+        run: bash ./scripts/release

@@ -11,13 +11,30 @@ on:
       - 'Makefile'
 
 jobs:
-  build:
+  build-ubuntu:
     runs-on: ubuntu-latest
     env:
       CROSS: true
+      REPO:  ${{ vars.REPO }}
     container:
       image: rancher/dapper:v0.5.4
     steps:
       - uses: actions/checkout@v1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.54
       - name: Run CI
         run: dapper ci
+  build-windows-on-2022:
+    runs-on: windows-2022
+    env:
+      REPO: ${{ vars.REPO }}
+    steps:
+      - uses: actions/checkout@v1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.54
+      - name: Run CI
+        run: bash ./scripts/ci

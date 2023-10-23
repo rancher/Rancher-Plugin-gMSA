@@ -1,9 +1,14 @@
 #!/bin/bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)/..
 
 echo Running chart validation
+if [[ "${OS}" == "windows" ]]; then
+  echo Detected Windows OS, skipping chart validation
+  exit 0
+fi
 
 ./scripts/charts-build-scripts/pull-scripts
 ./bin/charts-build-scripts validate --local
