@@ -24,8 +24,10 @@ for i in "${IMAGES[@]}"; do
       for v in "${NANOSERVER_VERSIONS[@]}"; do
         # append the nano-server version to the image tag
         IMAGE=${REPO}/"$i":${TAG}-${v}
-        echo "docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE}  ."
-        docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE}  .
+        (
+            set -x
+            docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE} .
+        )
         echo Built ${IMAGE} for nanoserver version ${v}
       done
     else

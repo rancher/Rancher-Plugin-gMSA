@@ -14,19 +14,13 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.54
-      - name: validate-go
-        run: ./scripts/validate
+      - name: go-format
+        run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
   charts-validation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.54
-      - name: validate-go
-        run: ./scripts/validate
       - name: validate-charts
         run: ./scripts/validate-charts
 
