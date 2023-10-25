@@ -7,4 +7,4 @@ cd $(dirname $0)/..
 echo Starting validation
 
 echo Running: go fmt
-test -z "$(go fmt ${PACKAGES} | tee /dev/stderr)"
+test -z "$(go fmt ./... | tee /dev/stderr)"

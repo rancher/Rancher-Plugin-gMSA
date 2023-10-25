@@ -1,9 +1,9 @@
-name: MergeToMain-CI
+name: Tag-CI
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v[0-9]*\.[0-9]+[0-9]*\.[0-9]'
 
 jobs:
   go-validation:
@@ -69,6 +69,7 @@ jobs:
     runs-on: windows-2022
     env:
       REPO: ${{ vars.REPO }}
+      TAG: ${{ github.ref_name }}
     steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -82,3 +83,19 @@ jobs:
         run: bash ./scripts/package
       - name: publish-containers
         run: bash ./scripts/publish
+
+  create-release:
+    needs: [publish-windows-containers, build-all-binaries]
+    runs-on: ubuntu-latest
+    env:
+      CROSS: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build All Binaries
+        run: bash ./scripts/build
+      - uses: marvinpinto/action-automatic-releases@d68defdd11f9dcc7f52f35c1b7c236ee7513bcc1
+        with:
+          repo_token: ${{ github.token }}
+          files: |
+            ./bin/*
+            LICENSE

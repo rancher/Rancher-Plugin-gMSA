@@ -1,9 +1,8 @@
-name: CI-pullrequest
+name: PullRequest-CI
 
 on:
   pull_request:
     paths-ignore:
-      - 'scripts/**'
       - '*.dapper'
       - '.gitignore'
       - 'CODEOWNERS'
@@ -11,30 +10,72 @@ on:
       - 'Makefile'
 
 jobs:
-  build-ubuntu:
+  go-validation:
     runs-on: ubuntu-latest
-    env:
-      CROSS: true
-      REPO:  ${{ vars.REPO }}
-    container:
-      image: rancher/dapper:v0.5.4
     steps:
       - uses: actions/checkout@v1
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.54
-      - name: Run CI
-        run: dapper ci
-  build-windows-on-2022:
+      - name: validate-go
+        run: ./scripts/validate
+
+  charts-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.54
+      - name: validate-go
+        run: ./scripts/validate
+      - name: validate-charts
+        run: ./scripts/validate-charts
+
+  linux-tests:
+    needs: [go-validation, charts-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-go
+        run: ./scripts/test
+
+  windows-tests:
+    needs: [go-validation, charts-validation]
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-go
+        run: bash ./scripts/test
+
+  chart-tests:
+    needs: [go-validation, charts-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-charts
+        run: ./scripts/test-charts
+
+  build-all-binaries:
+    needs: [linux-tests, windows-tests, chart-tests]
+    runs-on: ubuntu-latest
+    env:
+      CROSS: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build All Binaries
+        run: bash ./scripts/build
+
+  build-windows-containers:
+    needs: [linux-tests, windows-tests, chart-tests]
     runs-on: windows-2022
     env:
       REPO: ${{ vars.REPO }}
     steps:
       - uses: actions/checkout@v1
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.54
-      - name: Run CI
-        run: bash ./scripts/ci
+      - name: build-binaries
+        run: bash ./scripts/build
+      - name: build-containers
+        run: bash ./scripts/package
