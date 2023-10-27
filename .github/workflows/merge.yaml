@@ -1,4 +1,4 @@
-name: MergeToMain-CI
+name: Merge To Main CI
 
 on:
   push:
@@ -50,16 +50,6 @@ jobs:
 
   build-all-binaries:
     needs: [linux-tests, windows-tests, chart-tests]
-    runs-on: ubuntu-latest
-    env:
-      CROSS: true
-    steps:
-      - uses: actions/checkout@v1
-      - name: Build All Binaries
-        run: bash ./scripts/build
-
-  publish-windows-containers:
-    needs: [build-all-binaries]
     runs-on: windows-2022
     env:
       REPO: ${{ vars.REPO }}
