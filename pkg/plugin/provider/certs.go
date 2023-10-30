@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -212,32 +213,65 @@ func RemoveCerts(namespace string) error {
 func UnImportCertificate(file certFile, namespace string) error {
 	dynamicDir := fmt.Sprintf("%s/%s", gmsaDirectory, namespace)
 
-	// get cert thumbprint using certutil. Thumbprints are equal to the sha1 hash of the certificate
-	certUtilArgs := []string{"-Command",
-		fmt.Sprintf("$(certutil %s)", file.hostFile), "-like", "\"Cert Hash(sha1):*\""}
+	logrus.Infof("Removing certificate %s", file.hostFile)
 
-	o, err := exec.Command("powershell", certUtilArgs...).Output()
+	// get cert thumbprint using certutil. Thumbprints are equal to the sha1 hash of the certificate.
+	// Cert util will return a sha1 field in the following format
+	// Cert Hash(sha1): <someHash>
+	certUtilArgs := []string{"-Command",
+		"certutil",
+		filepath.Join("C:%s", file.hostFile), "|", "Select-String", "-Pattern", `"Cert Hash\(sha1\)"`,
+	}
+
+	cmd := exec.Command("powershell", certUtilArgs...)
+	logrus.Debugf("Crafted Command: %s", cmd.String())
+
+	o, err := cmd.CombinedOutput()
 	if err != nil {
+		logrus.Infof("Encountered error calling certutil, output: %s", string(o))
 		return fmt.Errorf("failed to obtain sha1 thumbPrint of cert in %s: %v", dynamicDir, err)
 	}
 
-	thumb := strings.Split(string(o), " ")
-	if len(thumb) != 2 {
-		return fmt.Errorf("encountered error determining thumbprint of %s, certutil did not return properly formatted hash: %s", file.hostFile, string(o))
+	tmp := string(o)
+	tmp = strings.ReplaceAll(tmp, "\n", "")
+	tmp = strings.ReplaceAll(tmp, "\r", "")
+	thumb := strings.Split(tmp, " ")
+	if len(thumb) != 3 {
+		return fmt.Errorf("encountered error determining thumbprint of %s, certutil did not return properly formatted hash: \nCert Util Output: %s \nExtracted SHA1 Field: %s", file.hostFile, string(o), thumb)
 	}
-	thumbPrint := thumb[1]
 
-	// unimport the cert via its thumbprint
+	thumbPrint := thumb[2]
+	thumbPrintLocation := filepath.Join("Cert:", "LocalMachine", "Root", thumbPrint)
+
+	// check if cert exists in store
 	pwshArgs := []string{"-Command",
-		"Get-ChildItem", fmt.Sprintf("Cert:\\LocalMachine\\Root\\%s", thumbPrint), "|", "Remove-Item"}
+		"Test-Path", thumbPrintLocation}
 
-	_, err = exec.Command("powershell", pwshArgs...).CombinedOutput()
+	o, err = exec.Command("powershell", pwshArgs...).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to remove certificate %s: %v", file.hostFile, err)
+		logrus.Infof("Error determining certificate path, output: %s", string(o))
+		return fmt.Errorf("error encountered testing certificate path %s: %v", thumbPrintLocation, err)
+	}
+	logrus.Debugf("Crafted Command: %s", cmd.String())
+
+	if string(o) == "False" {
+		// cert does not exist in store, nothing to remove
+		return nil
 	}
 
-	logrus.Infof("successfully removed %s", file.hostFile)
+	pwshArgs = []string{"-Command",
+		"Get-ChildItem", thumbPrintLocation, "|", "Remove-Item"}
 
+	cmd = exec.Command("powershell", pwshArgs...)
+	logrus.Debugf("Crafted Command: %s", cmd.String())
+
+	o, err = cmd.CombinedOutput()
+	if err != nil {
+		logrus.Infof("Encountered error removing certificate, Remove-Item output: %s", string(o))
+		return fmt.Errorf("failed to remove certificate %s with cert location %s: %v", file.hostFile, thumbPrintLocation, err)
+	}
+
+	logrus.Infof("Successfully removed %s", file.hostFile)
 	return nil
 }
 

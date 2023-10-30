@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"github.com/sirupsen/logrus"
+
 	"fmt"
 	"os"
 )
@@ -41,6 +43,7 @@ func CreateDynamicDirectory(namespace string) error {
 
 func RemoveDynamicDirectory(namespace string) error {
 	subDirectory := fmt.Sprintf("%s/%s", gmsaDirectory, namespace)
+	logrus.Infof("Removing directory %s", subDirectory)
 	if _, err := os.Stat(subDirectory); !os.IsNotExist(err) {
 		err = os.RemoveAll(subDirectory)
 		if err != nil {
