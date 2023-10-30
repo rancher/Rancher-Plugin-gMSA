@@ -15,9 +15,9 @@ nameOverride: ""
 namespaceOverride: ""
 
 image:
-  repository: harrisonwaffel/ccg-plugin-installer # TODO: change to Rancher fork
-  tag: latest # TODO: change to Rancher tag
-  imagePullPolicy: Always # TODO: change to IfNotPresent
+  repository: rancher/ccg-plugin-installer
+  tag: v0.0.1
+  imagePullPolicy: IfNotPresent
 
 pause:
   # standard pause images do not work on host-process containers
