@@ -1,6 +1,6 @@
 # Developer Test Cases
 
-During development, the following tests cases should be checked **_at minimum_** for each supported environment. This page provides a set of repeatable test cases which verify that the entire deployment and authorization flow of the feature functions as expected. More specific test cases relating to a particular component of the feature can be found in their respective directories.
+Before raising a PR, the following tests cases should be checked **_at minimum_** for each supported environment. This page provides a set of repeatable test cases which verify that the entire deployment and authorization flow of the feature functions as expected. More specific test cases relating to a particular component of the feature can be found in their respective directories.
 
 The creation and management of test environments can be automated through the use of terraform modules included within the [`rancher/windows`](https://github.com/rancher/windows/tree/main/terraform) repo. It's advised to use those terraform modules when preparing an environment to manually verify any of the test cases listed on this page, configuring these environments manually takes significant effort and time.
 
@@ -227,4 +227,4 @@ After installation, the following files should exist on the host:
 `/var/lib/rancher/gmsa/<NAMESPACE>/ssl/ca/ca.crt`
 
 ## Expected Files For The Account Provider Post Uninstall
-All the previously listed files should no longer exist once the Account Provider chart is uninstalled from the cluster 
+All the previously listed files should no longer exist once the Account Provider chart is uninstalled from the cluster. The uninstallation process is handled via a [Helm Hook](https://helm.sh/docs/topics/charts_hooks/). If these resources remain on a Windows node post uninstall of the chart, then there is an issue with the Helm Hook logic which must be addressed. 
