@@ -15,9 +15,9 @@ nameOverride: ""
 namespaceOverride: ""
 
 image:
-  repository: harrisonwaffel/gmsa-account-provider # TODO: change to Rancher fork
-  tag: latest # TODO: change to Rancher tag
-  imagePullPolicy: Always # TODO: change to IfNotPresent
+  repository: rancher/gmsa-account-provider
+  tag: v0.0.1
+  imagePullPolicy: IfNotPresent
 
 certificates:
   certManager:
