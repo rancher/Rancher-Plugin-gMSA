@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CROSS: true
+      TAG: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v1
       - name: Log in to Docker Hub
