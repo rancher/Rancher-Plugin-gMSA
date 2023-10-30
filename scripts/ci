@@ -6,7 +6,6 @@ cd $(dirname $0)
 ./build
 ./test
 ./test-charts
-# todo; during validation, git is going to report file changes due to different line endings
 ./validate
 ./validate-charts
 ./validate-ci

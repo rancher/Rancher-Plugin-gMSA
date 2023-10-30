@@ -1,0 +1,38 @@
+#!/bin/bash
+
+source $(dirname $0)/version
+
+IMAGES=("gmsa-account-provider" "ccg-plugin-installer")
+NANOSERVER_VERSIONS=("ltsc2019" "ltsc2022")
+
+if [[ "${OS}" != "windows" ]]; then
+  echo Only windows containers are published
+  exit 0
+fi
+
+for i in "${IMAGES[@]}"; do
+  FINAL_IMAGES=()
+    for v in "${NANOSERVER_VERSIONS[@]}"; do
+      IMAGE=${REPO}/"$i":${TAG}-${v}
+      echo Pushing "${IMAGE}"
+      docker push "${IMAGE}"
+      echo Successfully pushed "${IMAGE}"
+      FINAL_IMAGES+=("${IMAGE}")
+    done
+
+    # Unfortunately, we cannot use buildx due to how Microsoft
+    # packages the base nanoserver images. There is no general
+    # 'nanoserver' image which references both 2019 and 2022, there
+    # is only 'nanoserver-ltsc2019' and 'nanoserver-ltsc2022'
+    # this means we need to pass a build argument to specify
+    # what architecture we want to use for each component.
+    # So, we're stuck using the old manifest creation workflow
+    MULTI_ARCH_CMD=""
+    # create multi-arch manifest
+    for v in "${FINAL_IMAGES[@]}"; do
+      MULTI_ARCH_CMD+="--amend $v "
+    done
+
+    docker manifest create ${REPO}/"$i":${TAG} $MULTI_ARCH_CMD
+    docker manifest push ${REPO}/"$i":${TAG}
+done

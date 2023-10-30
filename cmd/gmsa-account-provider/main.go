@@ -108,7 +108,7 @@ type GMSAAccountProviderCleanup struct {
 	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
 }
 
-func (a *GMSAAccountProviderCleanup) Run(cmd *cobra.Command, _ []string) error {
+func (a *GMSAAccountProviderCleanup) Run(_ *cobra.Command, _ []string) error {
 	if a.Namespace == "" {
 		return fmt.Errorf("gmsa-account-provider must be run within a kubernetes namespace")
 	}

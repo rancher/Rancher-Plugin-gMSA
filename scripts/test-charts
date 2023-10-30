@@ -1,7 +1,14 @@
 #!/bin/bash
 set -e
 
+source $(dirname $0)/version
 cd $(dirname $0)/..
+
+# workaround until https://github.com/rancher/hull/pull/42 is merged
+if [[ "${OS}" == "windows" ]]; then
+  echo Detected Windows OS, skipping chart tests
+  exit 0
+fi
 
 # Execute in tests/ directory
 pushd tests 1>/dev/null

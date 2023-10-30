@@ -1,9 +1,8 @@
-name: CI-pullrequest
+name: Pull Request CI
 
 on:
   pull_request:
     paths-ignore:
-      - 'scripts/**'
       - '*.dapper'
       - '.gitignore'
       - 'CODEOWNERS'
@@ -11,13 +10,92 @@ on:
       - 'Makefile'
 
 jobs:
-  build:
+  DLL-validation:
+    runs-on: windows-2022
+    steps:
+      - name: 'PR commits + 1'
+        run: echo "PR_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: ${{ env.PR_FETCH_DEPTH }}
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            src:
+              - 'src/**'
+      - name: ensure DLL change
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          $diff = git diff --name-only HEAD^ HEAD
+          $SourceDiff = $diff | Where-Object { $_ -match '.dll$' }
+          if ($SourceDiff -lt 1) {
+            echo "C# Code has been changed but the DLL has not been updated. Please commit an updated version of the DLL
+            exit 1
+          }
+
+  go-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.54
+      - name: go-format
+        run: test -z "$(go fmt ./... | tee /dev/stderr)"
+
+  charts-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: validate-charts
+        run: ./scripts/validate-charts
+
+  linux-tests:
+    needs: [go-validation, charts-validation, DLL-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-go
+        run: ./scripts/test
+
+  windows-tests:
+    needs: [go-validation, charts-validation, DLL-validation]
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-go
+        run: bash ./scripts/test
+
+  chart-tests:
+    needs: [go-validation, charts-validation, DLL-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: test-charts
+        run: ./scripts/test-charts
+
+  build-all-binaries:
+    needs: [linux-tests, windows-tests, chart-tests]
     runs-on: ubuntu-latest
     env:
       CROSS: true
-    container:
-      image: rancher/dapper:v0.5.4
     steps:
       - uses: actions/checkout@v1
-      - name: Run CI
-        run: dapper ci
+      - name: Build All Binaries
+        run: bash ./scripts/build
+      - name: Validate CI
+        run: bash ./scripts/validate-ci
+
+  build-windows-containers:
+    needs: [linux-tests, windows-tests, chart-tests]
+    runs-on: windows-2022
+    env:
+      REPO: ${{ vars.REPO }}
+    steps:
+      - uses: actions/checkout@v1
+      - name: build-binaries
+        run: bash ./scripts/build
+      - name: build-containers
+        run: bash ./scripts/package

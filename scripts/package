@@ -20,24 +20,16 @@ for i in "${IMAGES[@]}"; do
   IMAGE=${REPO}/"$i":${TAG}
   DOCKERFILE="package/$i/Dockerfile${TEMP_DOCKER_SUFFIX}"
 
-  FINAL_IMAGES=()
   if [ "$OS" = "windows" ]; then
       for v in "${NANOSERVER_VERSIONS[@]}"; do
         # append the nano-server version to the image tag
         IMAGE=${REPO}/"$i":${TAG}-${v}
-        docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE}  .
-        FINAL_IMAGES+=("${IMAGE}")
+        (
+            set -x
+            docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE} .
+        )
         echo Built ${IMAGE} for nanoserver version ${v}
       done
-
-      MULTI_ARCH_CMD=""
-      # create multi-arch manifest
-      for v in "${FINAL_IMAGES[@]}"; do
-        MULTI_ARCH_CMD+="--amend $v "
-      done
-      # todo; this doesn't always work on windows servers
-      # docker manifest create "${REPO}/$i:${TAG}" ${MULTI_ARCH_CMD}
-
     else
       # don't try to build if the file doesn't exist
       if [ -f ${DOCKERFILE} ]; then
