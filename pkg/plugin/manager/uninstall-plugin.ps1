@@ -97,6 +97,9 @@ $key.SetAccessControl($acl)
 # deregister with regsvcs
 & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs" /u "C:\Program Files\RancherGMSACredentialProvider\RanchergMSACredentialProvider.dll"
 
+# Remove CCG reference
+Get-ChildItem Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CCG\COMClasses | Where {$_.Name -match "{e4781092-f116-4b79-b55e-28eb6a224e26}"} | Remove-Item
+
 #Set owner back to original owner and remove access rule for current user. 
 $acl = $key.GetAccessControl()
 $acl.RemoveAccessRule($rule)
