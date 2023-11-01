@@ -16,7 +16,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/gmsa-account-provider
-  tag: v0.0.1
+  tag: v0.0.2
   imagePullPolicy: IfNotPresent
 
 certificates:
