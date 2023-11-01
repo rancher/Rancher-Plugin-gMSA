@@ -28,6 +28,7 @@ Regardless of cluster configurations, the following prerequisites must be met:
     + As a reference, the Rancher gMSA Plugin GUID is `{e4781092-f116-4b79-b55e-28eb6a224e26}`. You must ensure that the value is wrapped in curly braces, otherwise CCG will not invoke the plugin.
     + As a reference, the Rancher gMSA Plugin DLL expects a `PluginInput` format of `<ACCOUNT_PROVIDER_NAMESPACE>:<SECRET>`, where `ACCOUNT_PROVIDER_NAMESPACE` is a namespace containing an Account Provider deployment. 
   + Ensure that the GMSACredentialSpec object specifies the GUID and SID of the _domain_ and **not** the GMSA account. 
+  + Ensure that a `ClusterRole` or `Role` that provides the `use` verb on the `GMSACredentialSpec` resource has been created.
 
 # Test Cluster configuration 
 
@@ -52,6 +53,38 @@ We currently do **not** provide support for or test against the following enviro
 
 + Clusters with 1 or more Windows workers interacting with **multiple** domains at once, either joined or un-joined
 + Clusters interacting with **multiple** Active Directory instances at once
+
+## Configure RBAC for your service account
+
+In order to test the Account Provider you must first install the GMSA Web-hook, which will provide the `GMSACredentialSpec` CRD  expand the contents of the resource onto pods. The web-hook chart will deploy a purpose built `ClusterRole` which permits access to all `GMSACredentialSpec` resources. However, the default `ClusterRoleBinding` deployed by the GMSA Web-hook chart only grants access to these resources to the service account used by the GMSA web-hook. In order to create workloads which utilize a `GMSACredentialSpec`, but run under a different service account, an additional `Role` and `RoleBinding` needs to be created for the service account you intend to use for testing.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: <GET_CREDENTIAL_SPEC_ROLE_NAME>
+  namespace: <GMSA_ENABLED_WORKLOAD_NAMESPACE>
+rules:
+  - apiGroups:
+      - windows.k8s.io
+    resources:
+      - gmsacredentialspecs
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: <GET_CREDENTIAL_SPEC_ROLE_BINDING_NAME>
+  namespace: <GMSA_ENABLED_WORKLOAD_NAMESPACE>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io/v1
+  kind: Role
+  name: <GET_CREDENTIAL_SPEC_ROLE_NAME>
+subjects:
+  - kind: ServiceAccount
+    name: <YOUR_SERVICE_ACCOUNT_NAME>
+```
 
 ## Sample gMSA Workload
 
