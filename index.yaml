@@ -10,10 +10,10 @@ entries:
       catalog.cattle.io/permits-os: linux,windows
       catalog.cattle.io/release-name: rancher-gmsa-account-provider
     apiVersion: v2
-    created: "2023-10-30T15:00:09.662948-04:00"
+    created: "2023-11-01T13:23:11.084885-04:00"
     description: The Rancher gMSA Account Provider assists the Rancher gMSA CCG Plugin
       during the non-domain-joined gMSA authorization process
-    digest: 6719bc752701237e8eac6b0fb128541b05bbae76057e5ffff51b834fc25d944a
+    digest: e78d24aa4d33a353004a57bd99f7b50aa6908a43a5e1d2fd853d2655a6872957
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
@@ -41,10 +41,10 @@ entries:
       catalog.cattle.io/permits-os: linux,windows
       catalog.cattle.io/release-name: rancher-gmsa-plugin-installer
     apiVersion: v2
-    created: "2023-10-30T15:00:09.671817-04:00"
+    created: "2023-11-01T13:23:11.09285-04:00"
     description: The Rancher gMSA CCG Plugin assists Windows Container Credential
       Guard during the non-domain-joined gMSA authorization process
-    digest: 74321da920c24cc4d925e7b6c43d059d0b8e1d8a95f19e1dfa090c8f6d889b96
+    digest: 4f7f670c64a5181153a75e58e21ee36b4e78a977b48bada97d797c0eb4f3dfdd
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
@@ -65,7 +65,7 @@ entries:
   - annotations:
       catalog.cattle.io/auto-install: rancher-windows-gmsa-crd=match
       catalog.cattle.io/certified: rancher
-      catalog.cattle.io/display-name: Windows GMSA
+      catalog.cattle.io/display-name: Windows gMSA
       catalog.cattle.io/experimental: "true"
       catalog.cattle.io/kube-version: '>= 1.21.0-0'
       catalog.cattle.io/namespace: cattle-windows-gmsa-system
@@ -75,10 +75,10 @@ entries:
       catalog.cattle.io/rancher-version: '>= 2.7.0-0'
       catalog.cattle.io/release-name: rancher-windows-gmsa
     apiVersion: v2
-    appVersion: 0.3.0
-    created: "2023-10-26T16:41:49.685472-04:00"
-    description: Windows GMSA Configuration
-    digest: 5adbe62e5d93743fda5534fec86e3a4f25220a88e68b48933ee3f4b037522778
+    appVersion: 0.7.0
+    created: "2023-11-01T13:23:11.565566-04:00"
+    description: Windows gMSA Configuration
+    digest: 47fbae96392df3ae70bcc89b96c9783067841c6f367a285315a91bae1e775aa8
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
