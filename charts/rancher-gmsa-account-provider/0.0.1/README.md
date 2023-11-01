@@ -145,14 +145,14 @@ If cert-manager is not enabled, these Secrets are expected to be externally mana
 
 Upon installation of the Rancher gMSA Account Provider each Windows Node should have a hostProcess container running which will expose an HTTP/s API on `localhost`. This API server will listen on a port assigned to it by the host. To retrieve the port that the server is listening on, find and view the contents of the `port.txt` file located within the `/var/lib/rancher/gmsa/<ACCOUNT_PROVIDER_NAMESPACE>` directory. The API server will respond to GET requests made against the `/provider` endpoint.
 
-Before you can test the API endpoint, you must ensure that you have an [impersonation account secret](#create-an-impersonation-account-secret) created within the account provider Kubernetes namespace. You can create a test impersonation account secret within the `cattle-windows-gmsa-system` namespace using the following command 
+Before you can test the API endpoint, you must ensure that you have an [impersonation account secret](#create-an-impersonation-account-secret) created within the account provider Kubernetes namespace. For example, if you have deployed an Account Provider into the `cattle-windows-workload-system` namespace, you can create a test impersonation account secret using the following command
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
   name: test-gmsa-impersonation-account-secret
-  namespace: cattle-windows-gmsa-system 
+  namespace: cattle-windows-workload-system 
 type: Opaque
 data:
   username: bXktYWQtZG9tYWluLmNvbQ== # username
@@ -160,15 +160,15 @@ data:
   domainName: dXNlcm5hbWU= # my-ad-domain.com
 ```
 
-Once the secret has been created, you can use the following PowerShell command to test the API endpoint. This example assumes that the account provider has been installed into the `cattle-windows-gmsa-system` namespace
+Once the secret has been created, you can use the following PowerShell command to test the API endpoint. This example assumes that the account provider has been installed into the `cattle-windows-workload-system` namespace
 
 ```powershell
-$PORT = $(type C:\var\lib\rancher\gmsa\cattle-windows-gmsa-system\port.txt)
-$PFX_PATH="C:\var\lib\rancher\gmsa\cattle-windows-gmsa-system\ssl\client\tls.pfx"
+$PORT = $(type C:\var\lib\rancher\gmsa\cattle-windows-workload-system\port.txt)
+$PFX_PATH="C:\var\lib\rancher\gmsa\cattle-windows-workload-system\ssl\client\tls.pfx"
 Invoke-WebRequest -Method GET -UseBasicParsing -Uri https://localhost:$PORT/provider -Certificate (Get-PfxCertificate $PFX_PATH)  -Headers @{'object' = 'test-gmsa-impersonation-account-secret'}
 ```
 
-If everything has been configured properly, the command will produce an output similar to the following 
+If everything has been configured properly, the command will produce an output similar to the following:
 
 ```
 StatusCode        : 200
