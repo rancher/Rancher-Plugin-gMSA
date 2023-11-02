@@ -7,4 +7,4 @@ annotations:
   catalog.cattle.io/certified: rancher
   catalog.cattle.io/hidden: "true"
   catalog.cattle.io/namespace: cattle-windows-gmsa-system
-  catalog.cattle.io/release-name: rancher-windows-gmsa-crd
+  catalog.cattle.io/release-name: rancher-gmsa-webhook-crd

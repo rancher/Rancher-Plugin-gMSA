@@ -63,7 +63,7 @@ entries:
     version: 0.0.1
   rancher-windows-gmsa:
   - annotations:
-      catalog.cattle.io/auto-install: rancher-windows-gmsa-crd=match
+      catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Windows gMSA
       catalog.cattle.io/experimental: "true"
@@ -73,7 +73,7 @@ entries:
       catalog.cattle.io/permits-os: windows
       catalog.cattle.io/provides-gvr: windows.k8s.io.gmsacredentialspecs/v1
       catalog.cattle.io/rancher-version: '>= 2.7.0-0'
-      catalog.cattle.io/release-name: rancher-windows-gmsa
+      catalog.cattle.io/release-name: rancher-gmsa-webhook
     apiVersion: v2
     appVersion: 0.7.0
     created: "2023-11-01T17:48:25.368058-04:00"
@@ -90,26 +90,26 @@ entries:
       name: Harrison Affel
     - email: arvind.iyengar@suse.com
       name: Arvind Iyengar
-    name: rancher-windows-gmsa
+    name: rancher-gmsa-webhook
     sources:
     - https://github.com/kubernetes-sigs/windows-gmsa
     type: application
     urls:
-    - assets/rancher-windows-gmsa/rancher-windows-gmsa-3.0.0.tgz
+    - assets/rancher-gmsa-webhook/rancher-gmsa-webhook-3.0.0.tgz
     version: 3.0.0
   rancher-windows-gmsa-crd:
   - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/hidden: "true"
       catalog.cattle.io/namespace: cattle-windows-gmsa-system
-      catalog.cattle.io/release-name: rancher-windows-gmsa-crd
+      catalog.cattle.io/release-name: rancher-gmsa-webhook-crd
     apiVersion: v1
     created: "2023-09-28T16:27:26.371396-04:00"
     description: Installs the CRDs for Windows GMSA.
     digest: bac3fc8e6316cfed9599be8d9b3e13d34beabde17708b302555f629d21f96154
-    name: rancher-windows-gmsa-crd
+    name: rancher-gmsa-webhook-crd
     type: application
     urls:
-    - assets/rancher-windows-gmsa-crd/rancher-windows-gmsa-crd-3.0.0.tgz
+    - assets/rancher-gmsa-webhook-crd/rancher-gmsa-webhook-crd-3.0.0.tgz
     version: 3.0.0
 generated: "2023-09-21T14:36:50.159995-04:00"

@@ -47,8 +47,8 @@ helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-accou
 You can also install `rancher-windows-gmsa` after the fact:
 
 ```bash
-helm install --create-namespace -n cattle-windows-gmsa-system rancher-windows-gmsa-crd charts/rancher-windows-gmsa-crd
-helm install --create-namespace -n cattle-windows-gmsa-system rancher-windows-gmsa charts/rancher-windows-gmsa
+helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-webhook-crd charts/rancher-gmsa-webhook-crd
+helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-webhook charts/rancher-gmsa-webhook
 ```
 
 ### Account Configuration
