@@ -1,0 +1,31 @@
+annotations:
+  catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/display-name: Windows gMSA
+  catalog.cattle.io/experimental: "true"
+  catalog.cattle.io/kube-version: '>= 1.21.0-0'
+  catalog.cattle.io/namespace: cattle-windows-gmsa-system
+  catalog.cattle.io/os: windows
+  catalog.cattle.io/permits-os: windows
+  catalog.cattle.io/provides-gvr: windows.k8s.io.gmsacredentialspecs/v1
+  catalog.cattle.io/rancher-version: '>= 2.7.0-0'
+  catalog.cattle.io/release-name: rancher-gmsa-webhook
+apiVersion: v2
+appVersion: 0.7.0
+description: Windows gMSA Configuration
+icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
+keywords:
+- Windows
+- Windows GMSA
+- GMSA
+- Active Directory
+maintainers:
+- email: harrison.affel@suse.com
+  name: Harrison Affel
+- email: arvind.iyengar@suse.com
+  name: Arvind Iyengar
+name: rancher-gmsa-webhook
+sources:
+- https://github.com/kubernetes-sigs/windows-gmsa
+type: application
+version: 0.0.1

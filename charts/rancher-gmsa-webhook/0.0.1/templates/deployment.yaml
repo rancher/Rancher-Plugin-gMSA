@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "gmsa.chartref" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      {{- if .Values.podSecurityContext }}
+      securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Release.Name }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        kubernetes.io/os: linux
+      {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: '{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /health
+              port: {{ .Values.containerPort }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          volumeMounts:
+            - name: tls
+              mountPath: "/etc/ssl/rancher-windows-gmsa-webhook"
+              readOnly: true
+          env:
+            - name: TLS_KEY
+              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.key
+            - name: TLS_CRT
+              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
+            - name: HTTPS_PORT
+              value: "{{ .Values.containerPort }}"
+          {{- if .Values.securityContext }}
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: tls
+          secret:
+            secretName: {{ .Values.certificates.secretName }}
+            items:
+              - key: tls.key
+                path: tls.key
+              - key: tls.crt
+                path: tls.crt
+      {{- if and (.Values.setPodOs) (ge .Capabilities.KubeVersion.Minor "24")}}
+      os:
+        name: linux
+      {{- end }}
