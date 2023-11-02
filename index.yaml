@@ -135,9 +135,9 @@ entries:
       catalog.cattle.io/release-name: rancher-gmsa-webhook
     apiVersion: v2
     appVersion: 0.7.0
-    created: "2023-11-02T12:24:40.347359-04:00"
+    created: "2023-11-02T13:22:30.080893-04:00"
     description: Windows gMSA Configuration
-    digest: f0bbc82dd3557d0aa326144755667c1e0b216d869f008301c680f753e4957b00
+    digest: 7e70a2b4bf444b5b8da6625dc32c196e0fd4e55fa07ce7e22fb62907e508c33b
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
