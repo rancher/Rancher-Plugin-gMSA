@@ -44,7 +44,7 @@ spec:
             - containerPort: {{ .Values.containerPort }}
           volumeMounts:
             - name: tls
-              mountPath: "/etc/ssl/rancher-windows-gmsa-webhook"
+              mountPath: /etc/ssl/{{ .Chart.Name }}
               readOnly: true
           env:
             - name: TLS_KEY
