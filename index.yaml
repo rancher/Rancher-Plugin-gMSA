@@ -10,6 +10,35 @@ entries:
       catalog.cattle.io/permits-os: linux,windows
       catalog.cattle.io/release-name: rancher-gmsa-account-provider
     apiVersion: v2
+    created: "2023-11-02T12:44:53.813811-04:00"
+    description: The Rancher gMSA Account Provider assists the Rancher gMSA CCG Plugin
+      during the non-domain-joined gMSA authorization process
+    digest: b43c88d6de5574371319f643f1871535c13696ab25eefc6f91c8485c621026ba
+    icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
+    keywords:
+    - Windows
+    - Windows GMSA
+    - GMSA
+    - Active Directory
+    maintainers:
+    - email: harrison.affel@gmail.com
+      name: Harrison
+    - email: arvindiyengar@suse.com
+      name: Arvind
+    name: rancher-gmsa-account-provider
+    type: application
+    urls:
+    - assets/rancher-gmsa-account-provider/rancher-gmsa-account-provider-0.1.0.tgz
+    version: 0.1.0
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Rancher gMSA Account Provider
+      catalog.cattle.io/experimental: "true"
+      catalog.cattle.io/kube-version: '>=1.24.0-0'
+      catalog.cattle.io/os: windows
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/release-name: rancher-gmsa-account-provider
+    apiVersion: v2
     created: "2023-11-01T17:42:37.15525-04:00"
     description: The Rancher gMSA Account Provider assists the Rancher gMSA CCG Plugin
       during the non-domain-joined gMSA authorization process
@@ -41,6 +70,36 @@ entries:
       catalog.cattle.io/permits-os: linux,windows
       catalog.cattle.io/release-name: rancher-gmsa-plugin-installer
     apiVersion: v2
+    created: "2023-11-02T12:44:53.823228-04:00"
+    description: The Rancher gMSA CCG Plugin assists Windows Container Credential
+      Guard during the non-domain-joined gMSA authorization process
+    digest: 9930dc32f621ef2ed77ec9e2e64bec125a680fb4798c6790e4c0d33cd4c972a6
+    icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
+    keywords:
+    - Windows
+    - Windows GMSA
+    - GMSA
+    - Active Directory
+    maintainers:
+    - email: harrison.affel@gmail.com
+      name: Harrison
+    - email: arvindiyengar@suse.com
+      name: Arvind
+    name: rancher-gmsa-plugin-installer
+    type: application
+    urls:
+    - assets/rancher-gmsa-plugin-installer/rancher-gmsa-plugin-installer-0.1.0.tgz
+    version: 0.1.0
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Rancher gMSA CCG Plugin
+      catalog.cattle.io/experimental: "true"
+      catalog.cattle.io/kube-version: '>=1.24.0'
+      catalog.cattle.io/namespace: cattle-windows-gmsa-system
+      catalog.cattle.io/os: windows
+      catalog.cattle.io/permits-os: linux,windows
+      catalog.cattle.io/release-name: rancher-gmsa-plugin-installer
+    apiVersion: v2
     created: "2023-11-01T13:23:11.09285-04:00"
     description: The Rancher gMSA CCG Plugin assists Windows Container Credential
       Guard during the non-domain-joined gMSA authorization process
@@ -61,9 +120,9 @@ entries:
     urls:
     - assets/rancher-gmsa-plugin-installer/rancher-gmsa-plugin-installer-0.0.1.tgz
     version: 0.0.1
-  rancher-windows-gmsa:
+  rancher-gmsa-webhook:
   - annotations:
-      catalog.cattle.io/auto-install: rancher-windows-gmsa-crd=match
+      catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Windows gMSA
       catalog.cattle.io/experimental: "true"
@@ -73,12 +132,12 @@ entries:
       catalog.cattle.io/permits-os: windows
       catalog.cattle.io/provides-gvr: windows.k8s.io.gmsacredentialspecs/v1
       catalog.cattle.io/rancher-version: '>= 2.7.0-0'
-      catalog.cattle.io/release-name: rancher-windows-gmsa
+      catalog.cattle.io/release-name: rancher-gmsa-webhook
     apiVersion: v2
     appVersion: 0.7.0
-    created: "2023-11-01T17:48:25.368058-04:00"
+    created: "2023-11-02T13:22:30.080893-04:00"
     description: Windows gMSA Configuration
-    digest: 1d855371a06faccf1ebd160bb8e4db4321b8ca8e536626016bbaac2042d33139
+    digest: 7e70a2b4bf444b5b8da6625dc32c196e0fd4e55fa07ce7e22fb62907e508c33b
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
@@ -90,26 +149,26 @@ entries:
       name: Harrison Affel
     - email: arvind.iyengar@suse.com
       name: Arvind Iyengar
-    name: rancher-windows-gmsa
+    name: rancher-gmsa-webhook
     sources:
     - https://github.com/kubernetes-sigs/windows-gmsa
     type: application
     urls:
-    - assets/rancher-windows-gmsa/rancher-windows-gmsa-3.0.0.tgz
-    version: 3.0.0
-  rancher-windows-gmsa-crd:
+    - assets/rancher-gmsa-webhook/rancher-gmsa-webhook-0.1.0.tgz
+    version: 0.1.0
+  rancher-gmsa-webhook-crd:
   - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/hidden: "true"
       catalog.cattle.io/namespace: cattle-windows-gmsa-system
-      catalog.cattle.io/release-name: rancher-windows-gmsa-crd
+      catalog.cattle.io/release-name: rancher-gmsa-webhook-crd
     apiVersion: v1
-    created: "2023-09-28T16:27:26.371396-04:00"
+    created: "2023-11-02T12:24:40.348016-04:00"
     description: Installs the CRDs for Windows GMSA.
-    digest: bac3fc8e6316cfed9599be8d9b3e13d34beabde17708b302555f629d21f96154
-    name: rancher-windows-gmsa-crd
+    digest: 132cfcf3fd440492cdbc99f33ab221b9a4d7f0f143dc8470fd98ebf96a06026a
+    name: rancher-gmsa-webhook-crd
     type: application
     urls:
-    - assets/rancher-windows-gmsa-crd/rancher-windows-gmsa-crd-3.0.0.tgz
-    version: 3.0.0
+    - assets/rancher-gmsa-webhook-crd/rancher-gmsa-webhook-crd-0.1.0.tgz
+    version: 0.1.0
 generated: "2023-09-21T14:36:50.159995-04:00"

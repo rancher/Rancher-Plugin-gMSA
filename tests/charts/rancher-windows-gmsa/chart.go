@@ -6,10 +6,10 @@ import (
 	"github.com/rancher/hull/pkg/utils"
 )
 
-var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../index.yaml", "rancher-windows-gmsa", true)
+var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../index.yaml", "rancher-gmsa-webhook", true)
 
 var (
-	DefaultReleaseName = "rancher-windows-gmsa"
+	DefaultReleaseName = "rancher-gmsa-webhook"
 	DefaultNamespace   = "cattle-windows-gmsa-system"
 )
 
