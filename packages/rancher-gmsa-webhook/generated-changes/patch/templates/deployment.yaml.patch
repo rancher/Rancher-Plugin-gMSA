@@ -10,10 +10,10 @@
            env:
              - name: TLS_KEY
 -              value: /tls/key
-+              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.key
++              value: /etc/ssl/{{ .Chart.Name }}/tls.key
              - name: TLS_CRT
 -              value: /tls/crt
-+              value: /etc/ssl/rancher-windows-gmsa-webhook/tls.crt
++              value: /etc/ssl/{{ .Chart.Name }}/tls.crt
              - name: HTTPS_PORT
                value: "{{ .Values.containerPort }}"
            {{- if .Values.securityContext }}
