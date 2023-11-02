@@ -5,7 +5,7 @@ Installing Rancher gMSA CCG Plugin requires the installation of two Helm charts 
 1. [`rancher-gmsa-plugin-installer`](../charts/rancher-gmsa-plugin-installer): install the CCG Plugin onto each Windows host in your cluster
 2. [`rancher-gmsa-account-provider`](../charts/rancher-gmsa-account-provider): serves as a local proxy on each host for the CCG Plugin to grab a Secret from the Kubernetes cluster
 
-Once installed, you may also want to install [`rancher-windows-gmsa`](../charts/rancher-windows-gmsa) (and `rancher-windows-gmsa-crd`), which adds [admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) on Pods to fill out gMSA credentials based on configuration stored in a `GMSACredentialSpec`. This will allow your Pods to specify that they should run as a specific gMSA account.
+Once installed, you may also want to install [`rancher-gmsa-webhook`](../charts/rancher-gmsa-webhook) (and `rancher-gmsa-webhook-crd`), which adds [admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) on Pods to fill out gMSA credentials based on configuration stored in a `GMSACredentialSpec`. This will allow your Pods to specify that they should run as a specific gMSA account.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-plugi
 helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-account-provider charts/rancher-gmsa-account-provider
 ```
 
-You can also install `rancher-windows-gmsa` after the fact:
+You can also install `rancher-gmsa-webhook` after the fact:
 
 ```bash
 helm install --create-namespace -n cattle-windows-gmsa-system rancher-gmsa-webhook-crd charts/rancher-gmsa-webhook-crd
