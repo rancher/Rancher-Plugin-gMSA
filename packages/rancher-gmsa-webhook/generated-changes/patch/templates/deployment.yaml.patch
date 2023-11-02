@@ -5,7 +5,7 @@
            volumeMounts:
              - name: tls
 -              mountPath: "/tls"
-+              mountPath: "/etc/ssl/rancher-windows-gmsa-webhook"
++              mountPath: /etc/ssl/{{ .Chart.Name }}
                readOnly: true
            env:
              - name: TLS_KEY
