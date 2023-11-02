@@ -16,7 +16,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/ccg-plugin-installer
-  tag: v0.0.2
+  tag: v0.1.0
   imagePullPolicy: IfNotPresent
 
 pause:
