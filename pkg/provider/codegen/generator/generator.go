@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	outputDir   = "./pkg/plugin/provider/generated"
+	outputDir   = "./pkg/provider/generated"
 	basePackage = "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg"
 	baseCattle  = "../client/generated"
 	baseK8s     = "norman"
