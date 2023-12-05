@@ -1,9 +1,9 @@
-package pkg
+package provider
 
 import (
 	"fmt"
 
-	v1 "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider/generated/norman/core/v1"
+	v1 "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/generated/norman/core/v1"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/rancher/wrangler/pkg/ratelimit"
 )

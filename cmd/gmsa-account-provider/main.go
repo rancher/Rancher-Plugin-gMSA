@@ -1,7 +1,7 @@
 package main
 
 import (
-	pkg "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/spf13/cobra"
@@ -58,24 +58,24 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	// cli debug
 	debugConfig.MustSetupDebug()
 
-	client, err := pkg.NewClient(a.Namespace, a.Kubeconfig)
+	client, err := provider.NewClient(a.Namespace, a.Kubeconfig)
 	if err != nil {
 		return fmt.Errorf("failed to setup client: %v", err)
 	}
 
-	server := pkg.HTTPServer{
+	server := provider.HTTPServer{
 		Credentials: client,
 	}
-	server.Engine = pkg.NewGinServer(&server, debugConfig.Debug)
+	server.Engine = provider.NewGinServer(&server, debugConfig.Debug)
 
 	if !a.SkipArtifacts {
 		// create all the files and directories we need on the host
-		err = pkg.CreateDynamicDirectory(a.Namespace)
+		err = provider.CreateDynamicDirectory(a.Namespace)
 		if err != nil {
 			return fmt.Errorf("failed to create dynamic directory: %v", err)
 		}
 
-		err = pkg.WriteCerts(a.Namespace)
+		err = provider.WriteCerts(a.Namespace)
 		if err != nil {
 			return fmt.Errorf("failed to write mTLS certificates to host: %v", err)
 		}
@@ -88,7 +88,7 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	if !a.SkipArtifacts {
-		err = pkg.WritePortFile(a.Namespace, port)
+		err = provider.WritePortFile(a.Namespace, port)
 		if err != nil {
 			return fmt.Errorf("failed to create dynamic directory: %v", err)
 		}
@@ -117,5 +117,5 @@ func (a *GMSAAccountProviderCleanup) Run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("rancher-gmsa-account-provider can only be run within a single namespace")
 	}
 
-	return pkg.CleanupProvider(a.Namespace)
+	return provider.CleanupProvider(a.Namespace)
 }

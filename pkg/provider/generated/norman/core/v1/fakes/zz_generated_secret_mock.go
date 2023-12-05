@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	normancorev1 "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider/generated/norman/core/v1"
+	normancorev1 "github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/generated/norman/core/v1"
 	"github.com/rancher/norman/controller"
 	"github.com/rancher/norman/objectclient"
 	apicorev1 "k8s.io/api/core/v1"
