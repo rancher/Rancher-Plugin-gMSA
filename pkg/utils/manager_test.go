@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -113,5 +114,36 @@ func TestUseFs(t *testing.T) {
 		for path, fs := range manager.filesystems {
 			assert.IsTypef(t, memfs.New(), fs, "expected filesystem at %s to be memFs", path)
 		}
+	})
+
+	dummyPath := filepath.Join(ProviderDirectory, "dummy.txt")
+	dummyContent := []byte("hello world")
+
+	t.Run("Write File To OS", func(t *testing.T) {
+		SetupEnv()
+		t.Cleanup(func() {
+			os.Remove(dummyPath)
+		})
+		err := SetFile(dummyPath, dummyContent)
+		assert.Nil(t, err, "expected to be able to set a file in the os filesystem")
+		inOSContent, err := os.ReadFile(dummyPath)
+		assert.Nil(t, err, "expected dummy file to be set on the OS")
+		assert.Equal(t, string(dummyContent), string(inOSContent), "expected dummy file to contain dummy content")
+	})
+	t.Run("Reset Memory Filesystem", func(t *testing.T) {
+		SetupTestEnv()
+		dummyPath := filepath.Join(ProviderDirectory, "dummy.txt")
+		dummyContent := []byte("hello world")
+		err := SetFile(dummyPath, dummyContent)
+		assert.Nil(t, err, "expected to be able to set a file in the memory filesystem")
+		_, err = os.ReadFile(dummyPath)
+		assert.NotNil(t, err, "expected dummy file to not be retrievable from the OS %s", dummyPath)
+		inMemoryContent, err := GetFile(dummyPath)
+		assert.Nil(t, err, "expected dummy file to be set in memory")
+		assert.Equal(t, string(dummyContent), string(inMemoryContent), "expected dummy file to contain dummy content in memory")
+		// reset
+		SetupTestEnv()
+		_, err = GetFile(dummyPath)
+		assert.NotNil(t, err, "expected dummy file to not exist in reset memfs")
 	})
 }
