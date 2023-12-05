@@ -3,7 +3,7 @@ package main
 import (
 	_ "net/http/pprof"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/manager"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/spf13/cobra"
@@ -47,7 +47,7 @@ type CCGPluginInstaller struct {
 func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return manager.Install()
+	return installer.Install()
 }
 
 type CCGPluginUninstaller struct {
@@ -56,7 +56,7 @@ type CCGPluginUninstaller struct {
 func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return manager.Uninstall()
+	return installer.Uninstall()
 }
 
 type CCGPluginUpgrader struct {
@@ -65,5 +65,5 @@ type CCGPluginUpgrader struct {
 func (i *CCGPluginUpgrader) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return manager.Upgrade()
+	return installer.Upgrade()
 }
