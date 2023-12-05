@@ -1,4 +1,4 @@
-package pkg
+package provider
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/plugin/provider/generated/norman/core/v1/fakes"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/generated/norman/core/v1/fakes"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
