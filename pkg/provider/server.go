@@ -7,16 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type HTTPServer struct {
-	Engine  *gin.Engine
-	Secrets getter.NamespacedGeneric[*v1.Secret]
+	Handler http.Handler
 }
 
 func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMTLS bool) (string, error) {
@@ -28,7 +23,7 @@ func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMT
 
 	go func() {
 		s := http.Server{
-			Handler: h.Engine,
+			Handler: h.Handler,
 		}
 
 		if disableMTLS {
@@ -53,39 +48,4 @@ func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMT
 	}
 	logrus.Info("Listening on port ", port)
 	return port, nil
-}
-
-type Response struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	DomainName string `json:"domainName"`
-}
-
-func NewGinServer(h *HTTPServer) *gin.Engine {
-	e := gin.Default()
-	e.GET("/provider", h.handle)
-	return e
-}
-
-func (h *HTTPServer) handle(c *gin.Context) {
-	secret := c.GetHeader("object")
-	if secret == "" {
-		c.Status(http.StatusBadRequest)
-		logrus.Info("Received request with no object")
-		return
-	}
-
-	s, err := h.Secrets.Get(secret)
-	// Handle forbidden requests in the same manner as 404's so no feedback is given to the caller
-	if errors.IsForbidden(err) || errors.IsNotFound(err) {
-		c.Status(http.StatusNotFound)
-		logrus.Warnf("error retrieving secret %s: %v", secret, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, Response{
-		Username:   string(s.Data["username"]),
-		Password:   string(s.Data["password"]),
-		DomainName: string(s.Data["domainName"]),
-	})
 }
