@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type HTTPServer struct {
@@ -72,7 +71,7 @@ func (h *HTTPServer) handle(c *gin.Context) {
 		return
 	}
 
-	s, err := h.Credentials.Secrets.Get(secret, metav1.GetOptions{})
+	s, err := h.Credentials.Secrets.Get(secret)
 	// Handle forbidden requests in the same manner as 404's so no feedback is given to the caller
 	if errors.IsForbidden(err) || errors.IsNotFound(err) {
 		c.Status(http.StatusNotFound)
