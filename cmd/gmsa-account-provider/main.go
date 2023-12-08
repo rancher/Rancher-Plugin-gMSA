@@ -1,10 +1,17 @@
 package main
 
 import (
+	"context"
+
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
+	"github.com/rancher/wrangler/pkg/kubeconfig"
+	"github.com/rancher/wrangler/pkg/ratelimit"
 	"github.com/spf13/cobra"
+	v1 "k8s.io/api/core/v1"
 
 	"fmt"
 	"strings"
@@ -58,13 +65,20 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	// cli debug
 	debugConfig.MustSetupDebug()
 
-	client, err := provider.NewClient(a.Namespace, a.Kubeconfig)
+	cfg := kubeconfig.GetNonInteractiveClientConfig(a.Kubeconfig)
+	clientConfig, err := cfg.ClientConfig()
 	if err != nil {
-		return fmt.Errorf("failed to setup client: %v", err)
+		return fmt.Errorf("found not create client config: %v", err)
+	}
+	clientConfig.RateLimiter = ratelimit.None
+
+	secrets, err := controllers.Run(context.TODO(), a.Namespace, clientConfig)
+	if err != nil {
+		return err
 	}
 
 	server := provider.HTTPServer{
-		Credentials: client,
+		Secrets: getter.Namespaced[*v1.Secret](secrets, a.Namespace),
 	}
 	server.Engine = provider.NewGinServer(&server, debugConfig.Debug)
 
