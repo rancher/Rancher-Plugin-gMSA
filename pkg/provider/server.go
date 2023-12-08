@@ -7,14 +7,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type HTTPServer struct {
-	Engine      *gin.Engine
-	Credentials *CredentialClient
+	Engine  *gin.Engine
+	Secrets getter.NamespacedGeneric[*v1.Secret]
 }
 
 func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMTLS bool) (string, error) {
@@ -77,7 +79,7 @@ func (h *HTTPServer) handle(c *gin.Context) {
 		return
 	}
 
-	s, err := h.Credentials.Secrets.Get(secret)
+	s, err := h.Secrets.Get(secret)
 	// Handle forbidden requests in the same manner as 404's so no feedback is given to the caller
 	if errors.IsForbidden(err) || errors.IsNotFound(err) {
 		c.Status(http.StatusNotFound)

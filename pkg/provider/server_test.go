@@ -17,9 +17,7 @@ var mockServ *HTTPServer
 
 func TestMain(m *testing.M) {
 	mockServ = &HTTPServer{
-		Credentials: &CredentialClient{
-			Secrets: createMockClient(),
-		},
+		Secrets: createMockClient(),
 	}
 	mockServ.Engine = NewGinServer(mockServ, true)
 	m.Run()
