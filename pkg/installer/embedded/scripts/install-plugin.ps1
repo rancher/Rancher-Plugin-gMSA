@@ -2,7 +2,6 @@
 
 & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs" /fc "C:\Program Files\RanchergMSACredentialProvider\RanchergMSACredentialProvider.dll"
 
-
 $comAdmin = New-Object -comobject COMAdmin.COMAdminCatalog
 $apps = $comAdmin.GetCollection("Applications")
 $apps.Populate()
