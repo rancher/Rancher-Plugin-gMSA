@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/embedded"
 	"github.com/sirupsen/logrus"
 )
 
@@ -62,7 +63,7 @@ func needsUpgrade() (bool, error) {
 		return false, fmt.Errorf("could not read existing dll file: %v", err)
 	}
 
-	if !bytes.Equal(f, dll) {
+	if !bytes.Equal(f, embedded.DLL) {
 		logrus.Infof("outdated DLL detected, beginning upgrade...")
 		return true, nil
 	}
@@ -91,7 +92,7 @@ func renameDll() error {
 // writeNewDll writes the embedded DLL to the host
 func writeNewDll() error {
 	logrus.Infof("writing updated dll to disk...")
-	err := os.WriteFile(dllFilePath(), dll, os.ModePerm)
+	err := os.WriteFile(dllFilePath(), embedded.DLL, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to write dll file: %v", err)
 	}
