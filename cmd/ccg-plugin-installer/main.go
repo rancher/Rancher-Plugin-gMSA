@@ -2,10 +2,12 @@ package main
 
 import (
 	_ "net/http/pprof"
+	"time"
 
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -42,28 +44,45 @@ func main() {
 }
 
 type CCGPluginInstaller struct {
+	Timeout int `usage:"Specify a timeout after executing main operation" default:"0" env:"CCG_PLUGIN_INSTALLER_TIMEOUT"`
 }
 
 func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return installer.Install()
+	err := installer.Install()
+	executeTimeout(i.Timeout)
+	return err
 }
 
 type CCGPluginUninstaller struct {
+	Timeout int `usage:"Specify a timeout after executing main operation" default:"0" env:"CCG_PLUGIN_INSTALLER_TIMEOUT"`
 }
 
 func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return installer.Uninstall()
+	err := installer.Uninstall()
+	executeTimeout(i.Timeout)
+	return err
 }
 
 type CCGPluginUpgrader struct {
+	Timeout int `usage:"Specify a timeout after executing main operation" default:"0" env:"CCG_PLUGIN_INSTALLER_TIMEOUT"`
 }
 
 func (i *CCGPluginUpgrader) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
-	return installer.Upgrade()
+	err := installer.Upgrade()
+	executeTimeout(i.Timeout)
+	return err
+}
+
+func executeTimeout(timeout int) {
+	if timeout <= 0 {
+		return
+	}
+	logrus.Infof("Sleeping for %d seconds before exiting...", timeout)
+	time.Sleep(time.Duration(timeout) * time.Second)
 }
