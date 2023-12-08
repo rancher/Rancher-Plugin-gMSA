@@ -7,11 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/generated/norman/core/v1/fakes"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var mockServ *HTTPServer
@@ -26,24 +25,27 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func createMockClient() *fakes.SecretInterfaceMock {
-	return &fakes.SecretInterfaceMock{
-		GetFunc: func(name string, opts metav1.GetOptions) (*v1.Secret, error) {
-			switch name {
-			case "test":
-				return &v1.Secret{
-					Data: map[string][]byte{
-						"username":   []byte("one"),
-						"password":   []byte("pass"),
-						"domainName": []byte("test.com"),
-					},
-				}, nil
-			case "unauthorizedTest":
-				return nil, errors.NewForbidden(v1.Resource("secret"), "", nil)
-			}
-			return nil, errors.NewNotFound(v1.Resource("secret"), name)
-		},
+type mockGetter struct {
+}
+
+func (m *mockGetter) Get(name string) (*v1.Secret, error) {
+	switch name {
+	case "test":
+		return &v1.Secret{
+			Data: map[string][]byte{
+				"username":   []byte("one"),
+				"password":   []byte("pass"),
+				"domainName": []byte("test.com"),
+			},
+		}, nil
+	case "unauthorizedTest":
+		return nil, errors.NewForbidden(v1.Resource("secret"), "", nil)
 	}
+	return nil, errors.NewNotFound(v1.Resource("secret"), name)
+}
+
+func createMockClient() getter.NamespacedGeneric[*v1.Secret] {
+	return &mockGetter{}
 }
 
 func Test_Headers(t *testing.T) {
