@@ -22,7 +22,7 @@ function build-dll() {
   docker create --name dllbuild rancher/gmsa-ccg-plugin-builder:latest
 
   # cp the resulting artifact into the manager directory so we can embed the file on build
-  docker cp dllbuild:/app/bin/Debug/RanchergMSACredentialProvider.dll pkg/plugin/manager/RanchergMSACredentialProvider.dll
+  docker cp dllbuild:/app/bin/Debug/RanchergMSACredentialProvider.dll pkg/installer/embedded/RanchergMSACredentialProvider.dll
 
   # clean up the container
   docker rm dllbuild

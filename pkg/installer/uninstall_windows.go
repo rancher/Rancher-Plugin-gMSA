@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/embedded"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,7 +26,7 @@ func Uninstall() error {
 	}
 
 	logrus.Info("Beginning uninstallation process...")
-	err = os.WriteFile(uninstallScriptFilePath(), uninstaller, os.ModePerm)
+	err = os.WriteFile(uninstallScriptFilePath(), embedded.UninstallScript, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("failed to write install script: %v", err)
 	}

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/embedded"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,13 +79,13 @@ func writeArtifacts() error {
 	}
 	logrus.Infof("successfully created base directory %s", baseDir)
 
-	err = os.WriteFile(dllFilePath(), dll, os.ModePerm)
+	err = os.WriteFile(dllFilePath(), embedded.DLL, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to write dll file: %v", err)
 	}
 	logrus.Infof("successfully wrote plugin dll to disk")
 
-	err = os.WriteFile(installScriptFilePath(), installer, os.ModePerm)
+	err = os.WriteFile(installScriptFilePath(), embedded.InstallScript, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("failed to write install script: %v", err)
 	}

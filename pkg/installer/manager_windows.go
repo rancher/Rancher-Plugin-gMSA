@@ -6,15 +6,6 @@ import (
 	_ "embed"
 )
 
-//go:embed RanchergMSACredentialProvider.dll
-var dll []byte
-
-//go:embed install-plugin.ps1
-var installer []byte
-
-//go:embed uninstall-plugin.ps1
-var uninstaller []byte
-
 const (
 	// baseDir is where we expect the dll to live
 	baseDir = "C:\\Program Files\\RanchergMSACredentialProvider"
