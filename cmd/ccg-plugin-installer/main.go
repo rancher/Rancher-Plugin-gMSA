@@ -26,17 +26,13 @@ func main() {
 	cmd.AddCommand(
 		command.AddDebug(command.Command(&CCGPluginInstaller{}, cobra.Command{
 			Use:          "install",
-			Short:        "Install the Rancher CCG Plugin as a DLL on your host",
+			Aliases:      []string{"upgrade"},
+			Short:        "Installs or upgrades the Rancher CCG Plugin as a DLL on your host",
 			SilenceUsage: true,
 		}), &debugConfig),
 		command.AddDebug(command.Command(&CCGPluginUninstaller{}, cobra.Command{
 			Use:          "uninstall",
 			Short:        "Uninstall the Rancher CCG Plugin",
-			SilenceUsage: true,
-		}), &debugConfig),
-		command.AddDebug(command.Command(&CCGPluginUpgrader{}, cobra.Command{
-			Use:          "upgrade",
-			Short:        "Upgrade the Rancher CCG Plugin",
 			SilenceUsage: true,
 		}), &debugConfig),
 	)
@@ -63,18 +59,6 @@ func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
 	err := installer.Uninstall()
-	executeTimeout(i.Timeout)
-	return err
-}
-
-type CCGPluginUpgrader struct {
-	Timeout int `usage:"Specify a timeout after executing main operation" default:"0" env:"CCG_PLUGIN_INSTALLER_TIMEOUT"`
-}
-
-func (i *CCGPluginUpgrader) Run(_ *cobra.Command, _ []string) error {
-	debugConfig.MustSetupDebug()
-
-	err := installer.Upgrade()
 	executeTimeout(i.Timeout)
 	return err
 }
