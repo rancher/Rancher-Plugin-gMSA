@@ -32,9 +32,3 @@ func NewClient(namespace string, kubeConfig string) (*CredentialClient, error) {
 		Secrets: getter.Namespaced[*v1.Secret](secrets, namespace),
 	}, nil
 }
-
-type Response struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	DomainName string `json:"domainName"`
-}
