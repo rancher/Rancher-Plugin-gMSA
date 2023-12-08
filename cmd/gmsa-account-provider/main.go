@@ -6,6 +6,7 @@ import (
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/server"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	"github.com/gin-gonic/gin"
@@ -78,9 +79,8 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	server := provider.HTTPServer{
-		Secrets: getter.Namespaced[*v1.Secret](secrets, a.Namespace),
+		Handler: server.NewHandler(getter.Namespaced[*v1.Secret](secrets, a.Namespace)),
 	}
-	server.Engine = provider.NewGinServer(&server)
 
 	if !a.SkipArtifacts {
 		// create all the files and directories we need on the host
