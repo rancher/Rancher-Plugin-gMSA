@@ -53,6 +53,12 @@ func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMT
 	return port, nil
 }
 
+type Response struct {
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	DomainName string `json:"domainName"`
+}
+
 func NewGinServer(h *HTTPServer, debug bool) *gin.Engine {
 	e := gin.Default()
 	if !debug {
