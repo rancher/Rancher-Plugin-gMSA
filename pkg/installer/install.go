@@ -1,107 +1,96 @@
-//go:build windows
-
 package installer
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
+	"path/filepath"
 
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/embedded"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/status"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
-func Install() error {
-	directoryExists, fileExists, CCGEntryExists, ClassesRootKeyExists, err := verifyInstall()
+func Install() (err error) {
+	installationStatus, err := status.CheckInstallationStatus(embedded.DLL)
 	if err != nil {
-		return fmt.Errorf("failed to detect installation status: %v", err)
+		if err != status.ErrNotWindows {
+			return fmt.Errorf("unable to determine current status of plugin: %s", err)
+		}
+		// only put a warning out if this is not a Windows host
+		logrus.Warnf("%s", status.ErrNotWindows)
 	}
 
-	if directoryExists && fileExists && CCGEntryExists && ClassesRootKeyExists {
-		logrus.Info("Plugin already installed")
+	// Check if already up-to-date
+	if installationStatus.Installed() {
+		logrus.Infof(installationStatus.String())
 		return nil
 	}
 
-	logrus.Info("Beginning installation")
-
-	if !fileExists {
-		err = writeArtifacts()
-		if err != nil {
-			return fmt.Errorf("failed to write artifacts: %v", err)
+	logrus.Infof("Installing plugin...")
+	// Create directory if necessary
+	if installationStatus.RequiresDirectoryCreation() {
+		if err := utils.CreateDirectory(utils.DLLDirectory); err != nil {
+			return err
 		}
 	}
 
-	err = executeInstaller()
+	if installationStatus.RequiresUpgrade() {
+		// Some useful docs regarding upgrades
+		//  https://serverfault.com/questions/503721/replacing-dll-files-while-the-application-is-running
+		//	https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-updates
+		logrus.Debug("Moving existing CCG Plugin DLL to a temporary file")
+		undoFunc, deleteFunc, err := utils.RenameTempFile(filepath.Join(utils.DLLDirectory, utils.DLLPath))
+		if err != nil {
+			return nil
+		}
+		defer func() {
+			logrus.Debugf("Removing old DLL")
+			deleteErr := deleteFunc()
+			if deleteErr != nil {
+				logrus.Errorf("%s", deleteErr)
+			}
+		}()
+		defer func() {
+			if err == nil {
+				return
+			}
+			logrus.Debugf("Reverting DLL back to previous state")
+			undoErr := undoFunc()
+			if undoErr != nil {
+				logrus.Errorf("%s", undoErr)
+			}
+		}()
+	}
+
+	if installationStatus.RequiresInstall() {
+		if err := utils.SetFile(filepath.Join(utils.DLLDirectory, utils.DLLPath), embedded.DLL); err != nil {
+			return err
+		}
+		logrus.Infof("Successfully wrote CCG Plugin DLL to disk")
+	}
+
+	if installationStatus.RequiresRegistration() {
+		if err := utils.SetFile(filepath.Join(utils.DLLDirectory, utils.DLLInstallScriptPath), embedded.InstallScript); err != nil {
+			return err
+		}
+		logrus.Infof("Successfully wrote installation script to disk")
+
+		err := utils.RunPowershell(filepath.Join(utils.DLLDirectory, utils.DLLInstallScriptPath))
+		if err != nil {
+			return fmt.Errorf("failed to execute installation script: %v", err)
+		}
+		logrus.Infof("Successfully ran installation script")
+	}
+
+	installationStatus, err = status.CheckInstallationStatus(embedded.DLL)
 	if err != nil {
-		return fmt.Errorf("failed to execute installation script: %v", err)
+		if err != status.ErrNotWindows {
+			return fmt.Errorf("unable to determine final status of plugin: %s", err)
+		}
 	}
-
-	directoryExists, fileExists, CCGEntryExists, ClassesRootKeyExists, err = verifyInstall()
-	if err != nil {
-		return fmt.Errorf("failed to detect installation status: %v", err)
+	if installationStatus.Installed() {
+		logrus.Infof(installationStatus.String())
+		return nil
 	}
-
-	successfullyInstalled := true
-	if !directoryExists {
-		logrus.Infof("error encountered during installation: directory %s does not exist", baseDir)
-		successfullyInstalled = false
-	}
-
-	if !fileExists {
-		logrus.Infof("error encountered during installation: file %s does not exist", dllFilePath())
-		successfullyInstalled = false
-	}
-
-	if !CCGEntryExists {
-		logrus.Info("error encountered during installation: was not able to add plugin CLSID to CCG COM Classes Key")
-		successfullyInstalled = false
-	}
-
-	if !ClassesRootKeyExists {
-		logrus.Info("error encountered during installation: was not able to add plugin CLSID to HKEY_CLASSES_ROOT")
-		successfullyInstalled = false
-	}
-
-	if !successfullyInstalled {
-		return fmt.Errorf("failed to install plugin")
-	}
-
-	logrus.Info("Installation successful!")
-
-	return nil
-}
-
-func writeArtifacts() error {
-	err := os.Mkdir(baseDir, os.ModePerm)
-	if err != nil && !strings.Contains(err.Error(), "already exists") {
-		return fmt.Errorf("failed to create base directory: %v", err)
-	}
-	logrus.Infof("successfully created base directory %s", baseDir)
-
-	err = os.WriteFile(dllFilePath(), embedded.DLL, os.ModePerm)
-	if err != nil && !strings.Contains(err.Error(), "already exists") {
-		return fmt.Errorf("failed to write dll file: %v", err)
-	}
-	logrus.Infof("successfully wrote plugin dll to disk")
-
-	err = os.WriteFile(installScriptFilePath(), embedded.InstallScript, os.ModePerm)
-	if err != nil && !strings.Contains(err.Error(), "already exists") {
-		return fmt.Errorf("failed to write install script: %v", err)
-	}
-	logrus.Info("successfully wrote installer script to disk")
-
-	return nil
-}
-
-func executeInstaller() error {
-	// run installation command
-	cmd := exec.Command("powershell.exe", "-File", installScriptFilePath())
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		logrus.Info(string(out))
-		return fmt.Errorf("failed to execute installation script: %v", err)
-	}
-
-	return nil
+	return installationStatus.Error()
 }
