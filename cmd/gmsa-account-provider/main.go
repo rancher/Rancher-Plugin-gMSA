@@ -41,7 +41,7 @@ func main() {
 
 type GMSAAccountProvider struct {
 	Kubeconfig    string `usage:"Kubeconfig file" env:"KUBECONFIG"`
-	Namespace     string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
+	Namespace     string `usage:"Namespace to watch for Secrets" default:"cattle-windows-gmsa-system" env:"NAMESPACE"`
 	DisableMTLS   bool   `usage:"Disable mTLS" default:"false" env:"DISABLE_MTLS"`
 	SkipArtifacts bool   `usage:"Prevents any files from being written to the host. Implicitly disables mTLS." default:"false" env:"DISABLE_ARTIFACTS"`
 }
@@ -105,7 +105,7 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 }
 
 type GMSAAccountProviderCleanup struct {
-	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-gmsa-system" env:"NAMESPACE"`
+	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-windows-gmsa-system" env:"NAMESPACE"`
 }
 
 func (a *GMSAAccountProviderCleanup) Run(_ *cobra.Command, _ []string) error {
