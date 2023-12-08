@@ -2,10 +2,21 @@ package utils
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/osfs"
+)
+
+const (
+	PowershellPathEnvVar  = "POWERSHELL_PATH"
+	DefaultPowershellPath = "powershell.exe"
+)
+
+var (
+	DryRun         bool
+	PowershellPath string
 )
 
 func init() {
@@ -16,13 +27,24 @@ func init() {
 
 // SetupEnv sets up the default fs manager to use the real host (OS) filesystems
 func SetupEnv() {
+	PowershellPath = getPowershellPath()
+	DryRun = false
 	useOsFs()
 }
 
 // SetupTestEnv sets up the default fs manager to use in-memory filesystems
 // Any subsequent call to SetupTestEnv or SetupEnv will wipe out the filesystems created here.
 func SetupTestEnv() {
+	PowershellPath = getPowershellPath()
+	DryRun = true
 	useMemFs()
+}
+
+func getPowershellPath() string {
+	if val := os.Getenv(PowershellPathEnvVar); len(val) != 0 {
+		return val
+	}
+	return DefaultPowershellPath
 }
 
 // useOsFs sets up the default manager to use OS filesystems
