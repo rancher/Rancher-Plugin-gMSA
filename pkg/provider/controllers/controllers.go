@@ -14,6 +14,7 @@ import (
 	"github.com/rancher/wrangler/pkg/k8scheck"
 	"github.com/rancher/wrangler/pkg/start"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 )
@@ -49,14 +50,18 @@ func Run(ctx context.Context, namespace string, client *rest.Config) (corecontro
 	return appCtx.Core.Secret().Cache(), nil
 }
 
-func controllerFactory(rest *rest.Config) (controller.SharedControllerFactory, error) {
+func controllerFactory(namespace string, rest *rest.Config) (controller.SharedControllerFactory, error) {
 	rateLimit := workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second)
 	clientFactory, err := client.NewSharedClientFactory(rest, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	cacheFactory := cache.NewSharedCachedFactory(clientFactory, nil)
+	kindNamespace := map[schema.GroupVersionKind]string{
+		{Group: "", Version: "v1", Kind: "Secret"}: namespace,
+	}
+	cacheFactory := cache.NewSharedCachedFactory(clientFactory, &cache.SharedCacheFactoryOptions{
+		KindNamespace: kindNamespace,
+	})
 	return controller.NewSharedControllerFactory(cacheFactory, &controller.SharedControllerFactoryOptions{
 		DefaultRateLimiter: rateLimit,
 		DefaultWorkers:     50,
@@ -64,13 +69,12 @@ func controllerFactory(rest *rest.Config) (controller.SharedControllerFactory, e
 }
 
 func newContext(namespace string, client *rest.Config) (*appContext, error) {
-	scf, err := controllerFactory(client)
+	scf, err := controllerFactory(namespace, client)
 	if err != nil {
 		return nil, err
 	}
 
 	core, err := core.NewFactoryFromConfigWithOptions(client, &generic.FactoryOptions{
-		Namespace:               namespace,
 		SharedControllerFactory: scf,
 	})
 	if err != nil {
