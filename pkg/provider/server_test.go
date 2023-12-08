@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	mockServ = &HTTPServer{
 		Secrets: createMockClient(),
 	}
-	mockServ.Engine = NewGinServer(mockServ, true)
+	mockServ.Engine = NewGinServer(mockServ)
 	m.Run()
 }
 

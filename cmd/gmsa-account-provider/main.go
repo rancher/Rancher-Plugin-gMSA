@@ -6,7 +6,9 @@ import (
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
+	"github.com/gin-gonic/gin"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/rancher/wrangler/pkg/ratelimit"
@@ -14,7 +16,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"fmt"
-	"strings"
 )
 
 var (
@@ -54,16 +55,15 @@ type GMSAAccountProvider struct {
 }
 
 func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
-	if a.Namespace == "" {
-		return fmt.Errorf("gmsa-account-provider must be started within a kubernetes namespace")
-	}
-
-	if len(strings.Split(a.Namespace, " ")) > 1 {
-		return fmt.Errorf("rancher-gmsa-account-provider can only be started in a single namespace")
-	}
-
-	// cli debug
 	debugConfig.MustSetupDebug()
+	if !debugConfig.Debug {
+		// gin uses debug mode by default
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	if err := utils.ValidateNamespace(a.Namespace); err != nil {
+		return err
+	}
 
 	cfg := kubeconfig.GetNonInteractiveClientConfig(a.Kubeconfig)
 	clientConfig, err := cfg.ClientConfig()
@@ -80,7 +80,7 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	server := provider.HTTPServer{
 		Secrets: getter.Namespaced[*v1.Secret](secrets, a.Namespace),
 	}
-	server.Engine = provider.NewGinServer(&server, debugConfig.Debug)
+	server.Engine = provider.NewGinServer(&server)
 
 	if !a.SkipArtifacts {
 		// create all the files and directories we need on the host
@@ -123,12 +123,10 @@ type GMSAAccountProviderCleanup struct {
 }
 
 func (a *GMSAAccountProviderCleanup) Run(_ *cobra.Command, _ []string) error {
-	if a.Namespace == "" {
-		return fmt.Errorf("gmsa-account-provider must be run within a kubernetes namespace")
-	}
+	debugConfig.MustSetupDebug()
 
-	if len(strings.Split(a.Namespace, " ")) > 1 {
-		return fmt.Errorf("rancher-gmsa-account-provider can only be run within a single namespace")
+	if err := utils.ValidateNamespace(a.Namespace); err != nil {
+		return err
 	}
 
 	return provider.CleanupProvider(a.Namespace)
