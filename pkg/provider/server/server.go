@@ -1,4 +1,4 @@
-package provider
+package server
 
 import (
 	"crypto/tls"
@@ -33,7 +33,7 @@ func (h *HTTPServer) StartServer(errChan chan error, namespace string, disableMT
 				ClientAuth: tls.RequireAndVerifyClientCert,
 				MinVersion: tls.VersionTLS12,
 			}
-			err = s.ServeTLS(ln, fmt.Sprintf(containerServerCrt, gmsaDirectory, namespace), fmt.Sprintf(containerServerKey, gmsaDirectory, namespace))
+			err = s.ServeTLS(ln, fmt.Sprintf("%s/%s/container/ssl/server/tls.crt", "/var/lib/rancher/gmsa", namespace), fmt.Sprintf("%s/%s/container/ssl/server/tls.crt", "/var/lib/rancher/gmsa", namespace))
 		}
 
 		errChan <- fmt.Errorf("HTTP server encountered a fatal error: %v", err.Error())
