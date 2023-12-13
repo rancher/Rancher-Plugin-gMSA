@@ -4,7 +4,10 @@
 /dist
 *.swp
 .idea
-/Rancher-Plugin-gMSA
+/gmsa-account-provider.exe
+/gmsa-account-provider
+/ccg-plugin-installer.exe
+/ccg-plugin-installer
 .vscode/
 .DS_Store
 .charts-build-scripts
