@@ -1,12 +1,7 @@
 package main
 
 import (
-	"context"
-
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/server"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	"github.com/gin-gonic/gin"
@@ -14,9 +9,6 @@ import (
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/rancher/wrangler/pkg/ratelimit"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/api/core/v1"
-
-	"fmt"
 )
 
 var (
@@ -67,67 +59,30 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	cfg := kubeconfig.GetNonInteractiveClientConfig(a.Kubeconfig)
-	clientConfig, err := cfg.ClientConfig()
-	if err != nil {
-		return fmt.Errorf("found not create client config: %v", err)
-	}
-	clientConfig.RateLimiter = ratelimit.None
-
-	secrets, err := controllers.Run(context.TODO(), a.Namespace, clientConfig)
+	client, err := cfg.ClientConfig()
 	if err != nil {
 		return err
 	}
+	client.RateLimiter = ratelimit.None
 
-	server := server.HTTPServer{
-		Handler: server.NewHandler(getter.Namespaced[*v1.Secret](secrets, a.Namespace)),
-	}
-
-	if !a.SkipArtifacts {
-		// create all the files and directories we need on the host
-		err = provider.CreateDynamicDirectory(a.Namespace)
-		if err != nil {
-			return fmt.Errorf("failed to create dynamic directory: %v", err)
-		}
-
-		err = provider.WriteCerts(a.Namespace)
-		if err != nil {
-			return fmt.Errorf("failed to write mTLS certificates to host: %v", err)
-		}
-	}
-
-	errChan := make(chan error)
-	port, err := server.StartServer(errChan, a.Namespace, a.DisableMTLS || a.SkipArtifacts)
-	if err != nil {
-		return fmt.Errorf("failed to start http server: %v", err)
-	}
-
-	if !a.SkipArtifacts {
-		err = provider.WritePortFile(a.Namespace, port)
-		if err != nil {
-			return fmt.Errorf("failed to create dynamic directory: %v", err)
-		}
-	}
-
-	// block on http server error
-	// or command context completion
-	select {
-	case err = <-errChan:
+	if err := provider.Run(cmd.Context(), client, a.Namespace, a.DisableMTLS, a.SkipArtifacts); err != nil {
 		return err
-	case <-cmd.Context().Done():
-		return nil
 	}
+
+	<-cmd.Context().Done()
+	return nil
 }
 
 type GMSAAccountProviderCleanup struct {
 	Namespace string `usage:"Namespace to watch for Secrets" default:"cattle-windows-gmsa-system" env:"NAMESPACE"`
 }
 
-func (a *GMSAAccountProviderCleanup) Run(_ *cobra.Command, _ []string) error {
+func (a *GMSAAccountProviderCleanup) Run(cmd *cobra.Command, _ []string) error {
 	debugConfig.MustSetupDebug()
 
 	if err := utils.ValidateNamespace(a.Namespace); err != nil {
 		return err
 	}
 
-	return provider.CleanupProvider(a.Namespace)
+	return provider.Clean(cmd.Context(), a.Namespace)
 }
