@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers/secret"
 	"github.com/rancher/lasso/pkg/cache"
 	"github.com/rancher/lasso/pkg/client"
 	"github.com/rancher/lasso/pkg/controller"
@@ -35,7 +36,7 @@ func Run(ctx context.Context, namespace string, client *rest.Config) (corecontro
 		return nil, err
 	}
 
-	// TODO: Register controllers here
+	secret.Register(ctx, appCtx.Core.Secret())
 
 	go func() {
 		if err := k8scheck.Wait(ctx, *client); err != nil {
