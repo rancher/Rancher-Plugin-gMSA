@@ -1,6 +1,6 @@
 # Based on https://raw.githubusercontent.com/microsoft/Azure-Key-Vault-Plugin-gMSA/main/src/CCGAKVPlugin/InstallPlugin.ps1
 
-& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs" /fc "C:\Program Files\RanchergMSACredentialProvider\RanchergMSACredentialProvider.dll"
+& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs.exe" /fc "C:\Program Files\RanchergMSACredentialProvider\RanchergMSACredentialProvider.dll"
 
 $comAdmin = New-Object -comobject COMAdmin.COMAdminCatalog
 $apps = $comAdmin.GetCollection("Applications")
@@ -81,8 +81,7 @@ function enable-privilege {
 #set owner of key to current user
 if (enable-privilege SeTakeOwnershipPrivilege) {
     Write-Host "Enabled SeTakeOwnershipPrivilege privilege"
-}
-else {
+} else {
     Write-Host "Enabling SeTakeOwnershipPrivilege privilege failed"
 }
 
@@ -105,7 +104,7 @@ $rule = New-Object System.Security.AccessControl.RegistryAccessRule($idRef, $reg
 $acl.AddAccessRule($rule)
 $key.SetAccessControl($acl)
 
-New-item -path  "HKLM:\SYSTEM\CurrentControlSet\Control\CCG\COMClasses\{e4781092-f116-4b79-b55e-28eb6a224e26}" -Value ""
+New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\CCG\COMClasses\{e4781092-f116-4b79-b55e-28eb6a224e26}" -Value ""
 
 #Set owner back to original owner and remove access rule for current user. 
 $acl = $key.GetAccessControl()
@@ -113,8 +112,7 @@ $acl.RemoveAccessRule($rule)
 $acl.SetOwner([System.Security.Principal.NTAccount]$originalowner)
 if (enable-privilege SeRestorePrivilege) {
     Write-Host "Enabled SeRestorePrivilege privilege"
-}
-else {
+} else {
     Write-Host "Enabling SeRestorePrivilege privilege failed"
 }
 $key.SetAccessControl($acl)
@@ -123,14 +121,12 @@ $key.close()
 #Disable privileges. 
 if (enable-privilege SeRestorePrivilege -disable) {
     Write-Host "Disabled SeRestorePrivilege privilege"
-}
-else {
+} else {
     Write-Host "Disabling SeRestorePrivilege privilege failed"
 }
  
 if (enable-privilege SeTakeOwnershipPrivilege -disable) {
     Write-Host "Disabled SeTakeOwnershipPrivilege privilege"	
-}
-else {
+} else {
     Write-Host "Disabling SeTakeOwnershipPrivilege privilege failed"
 }
