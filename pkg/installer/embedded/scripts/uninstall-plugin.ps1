@@ -95,7 +95,7 @@ $acl.AddAccessRule($rule)
 $key.SetAccessControl($acl)
 
 # deregister with regsvcs
-& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs" /u "C:\Program Files\RancherGMSACredentialProvider\RanchergMSACredentialProvider.dll"
+& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regsvcs.exe" /u "C:\Program Files\RancherGMSACredentialProvider\RanchergMSACredentialProvider.dll"
 
 # Remove CCG reference
 Get-ChildItem Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CCG\COMClasses | Where {$_.Name -match "{e4781092-f116-4b79-b55e-28eb6a224e26}"} | Remove-Item
@@ -106,8 +106,7 @@ $acl.RemoveAccessRule($rule)
 $acl.SetOwner([System.Security.Principal.NTAccount]$originalowner)
 if (enable-privilege SeRestorePrivilege) {
     Write-Host "Enabled SeRestorePrivilege privilege"
-}
-else {
+} else {
     Write-Host "Enabling SeRestorePrivilege privilege failed"
 }
 $key.SetAccessControl($acl)
@@ -116,14 +115,12 @@ $key.close()
 #Disable privileges. 
 if (enable-privilege SeRestorePrivilege -disable) {
     Write-Host "Disabled SeRestorePrivilege privilege"
-}
-else {
+} else {
     Write-Host "Disabling SeRestorePrivilege privilege failed"
 }
 
 if (enable-privilege SeTakeOwnershipPrivilege -disable) {
     Write-Host "Disabled SeTakeOwnershipPrivilege privilege"
-}
-else {
+} else {
     Write-Host "Disabling SeTakeOwnershipPrivilege privilege failed"
 }
