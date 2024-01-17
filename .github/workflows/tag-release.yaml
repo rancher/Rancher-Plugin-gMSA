@@ -13,7 +13,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.54
+          version: v1.55
       - name: go-format
         run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
