@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/multierr"
 )

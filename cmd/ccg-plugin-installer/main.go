@@ -4,8 +4,8 @@ import (
 	_ "net/http/pprof"
 	"time"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/installer"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

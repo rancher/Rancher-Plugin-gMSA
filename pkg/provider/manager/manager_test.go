@@ -6,7 +6,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

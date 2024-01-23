@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/manager"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/manager"
 	"github.com/sirupsen/logrus"
 )
 
