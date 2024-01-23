@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/embedded"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/installer/status"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/installer/embedded"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/installer/status"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"

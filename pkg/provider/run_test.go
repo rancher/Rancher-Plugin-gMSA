@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/manager"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/manager"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 )

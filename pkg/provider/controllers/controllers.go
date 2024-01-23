@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/controllers/secret"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/controllers/secret"
 	"github.com/rancher/lasso/pkg/cache"
 	"github.com/rancher/lasso/pkg/client"
 	"github.com/rancher/lasso/pkg/controller"

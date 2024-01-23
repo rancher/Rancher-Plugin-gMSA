@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/version"
 	"github.com/gin-gonic/gin"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/version"
 	command "github.com/rancher/wrangler-cli"
 	"github.com/rancher/wrangler/pkg/kubeconfig"
 	"github.com/rancher/wrangler/pkg/ratelimit"

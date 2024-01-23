@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/gin-gonic/gin"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/getter"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

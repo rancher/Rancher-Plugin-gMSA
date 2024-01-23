@@ -1,4 +1,4 @@
-module github.com/aiyengar2/Rancher-Plugin-gMSA
+module github.com/rancher/Rancher-Plugin-gMSA
 
 go 1.19
 

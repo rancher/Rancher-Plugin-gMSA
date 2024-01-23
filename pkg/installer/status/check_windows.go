@@ -5,7 +5,7 @@ package status
 import (
 	"fmt"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/utils"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"golang.org/x/sys/windows/registry"
 )
 

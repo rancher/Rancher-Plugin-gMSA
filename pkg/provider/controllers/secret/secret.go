@@ -3,7 +3,7 @@ package secret
 import (
 	"context"
 
-	"github.com/aiyengar2/Rancher-Plugin-gMSA/pkg/provider/server"
+	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/server"
 	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
