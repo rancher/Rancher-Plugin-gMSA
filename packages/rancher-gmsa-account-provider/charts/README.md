@@ -191,6 +191,45 @@ RawContentLength  : 85
 
 If you receive a response like the above, then the account provider API is functioning as expected!
 
+## Certificate Rotation
+
+To rotate the certificates used by the Rancher gMSA Account Provider when certificates are managed by `cert-manager`, users can reference the following script:
+
+```bash
+GMSA_SYSTEM_NAMESPACE="cattle-windows-gmsa-system"
+CERT_MANAGER_ANNOTATION="cert-manager.io/certificate-name"
+
+# Note:
+# It is very important that the "ca-cert" certificate gets deleted **and** recreated before
+# you attempt to delete all other certificates. This is because the other certificates depend on
+# "ca-cert" existing, so if you delete them at the same time as ca-cert, the CertificateRequest resource
+# issued by cert-manager will be stuck.
+#
+# To fix this, you can simply delete the pending CertificateRequest resource and cert-manager will be
+# able to reconcile the secret again.
+for cert in "ca-cert" "ccg-dll-cert" "account-provider-cert"; do
+    kubectl delete -n $GMSA_SYSTEM_NAMESPACE secret $cert
+    while true; do
+        echo "Waiting for secret $GMSA_SYSTEM_NAMESPACE/$cert" to be recreated...
+        if kubectl -n $GMSA_SYSTEM_NAMESPACE get secret $cert >/dev/null 2>&1; then
+            break
+        fi
+        sleep 2
+    done
+done
+
+echo "Restarting gMSA Account Provider..."
+kubectl -n $GMSA_SYSTEM_NAMESPACE rollout restart daemonset/rancher-gmsa-account-provider
+
+# Note:
+# You do not need to restart the CCG DLL Installer or any gMSA workload pods when you update
+# the gMSA Account Provider's certificates. Once you redeploy the gMSA Account Provider onto each host,
+# the Account Provider will automatically update the hostPath certificates, which will be what is referenced
+# by the DLL (and subsequently all gMSA workload pods) when they attempt to retrieve the certificates.
+```
+
+If you brought your own certificates, simply update the relevant `Secret` objects in your cluster and run the final `kubectl rollout restart` command in the above script to achieve the same result.
+
 ## License
 Copyright (c) 2023 [Rancher Labs, Inc.](http://rancher.com)
 

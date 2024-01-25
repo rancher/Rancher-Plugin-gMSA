@@ -100,6 +100,12 @@ Upon uninstallation the only file which should be present within the `C:\Program
 
 If those files and registry keys no longer exist, then the CCGRKC plugin has been successfully uninstalled!
 
+## Certificate Rotation
+
+The CCGRKC Plugin DLL reaches out the the Rancher gMSA Account Provider using certificates found at the host path `C:\var\lib\rancher\gmsa\<account-provider-namespace>\ssl\client\tls.pfx`.
+
+Since the certificate bundle found at this path is managed by the Rancher gMSA Account Provider installation, no additional steps need to be taken to rotate certificates once you have followed the steps provided on the Rancher gMSA Account Provider docs.
+
 ## License
 Copyright (c) 2023 [Rancher Labs, Inc.](http://rancher.com)
 
