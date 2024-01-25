@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "rancher-gmsa-account-provider.name" . }}
+      release: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 8 }}
+        app: {{ template "rancher-gmsa-account-provider.name" . }}
+    spec:
+      hostNetwork: true
+      {{- if .Values.securityContext }}
+      securityContext: {{ toYaml .Values.securityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "rancher-gmsa-account-provider.name" . }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      nodeSelector:
+        kubernetes.io/os: windows
+      {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: account-provider
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          image: "{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          args:
+            - "run"
+          volumeMounts:
+            - mountPath: /var/lib/rancher/gmsa/{{ template "rancher-gmsa-account-provider.namespace" . }}/container/ssl/server
+              name: server-cert
+            - mountPath: /var/lib/rancher/gmsa/{{ template "rancher-gmsa-account-provider.namespace" . }}/container/ssl/client
+              name: client-cert
+            - mountPath: /var/lib/rancher/gmsa/{{ template "rancher-gmsa-account-provider.namespace" . }}/container/ssl/ca
+              name: ca-cert
+          env:
+            - name: NAMESPACE
+              value: {{ template "rancher-gmsa-account-provider.namespace" . }}
+      volumes:
+        - name: ca-cert
+          secret:
+            secretName: {{ .Values.certificates.caSecretName }}
+        - name: server-cert
+          secret:
+            secretName: {{ .Values.certificates.serverSecretName }}
+        - name: client-cert
+          secret:
+            secretName: {{ .Values.certificates.clientSecretName }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - secrets
+    verbs:
+    - get
+    - list
+    - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "rancher-gmsa-account-provider.name" . }}
+roleRef:
+  kind: Role
+  name: {{ template "rancher-gmsa-account-provider.name" . }}
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets: {{ toYaml .Values.global.imagePullSecrets | nindent 2 }}
+{{- end }}
