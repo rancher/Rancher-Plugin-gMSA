@@ -20,6 +20,9 @@ pull-scripts:
 rebase:
 	./scripts/charts-build-scripts/rebase
 
+remove:
+	./scripts/charts-build-scripts/remove-asset
+
 CHARTS_BUILD_SCRIPTS_TARGETS := prepare patch clean clean-cache charts list index unzip zip standardize template
 
 $(CHARTS_BUILD_SCRIPTS_TARGETS):
