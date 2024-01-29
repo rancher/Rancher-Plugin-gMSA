@@ -1,0 +1,37 @@
+{{- if .Values.certificates.certManager.enabled }}
+{{- $caCert := dict "name" "ca" "cert" .Values.certificates.certManager.caCert "secret" .Values.certificates.caSecretName }}
+{{- $clientCert := dict "name" "client" "cert" .Values.certificates.certManager.clientCert "secret" .Values.certificates.clientSecretName }}
+{{- $serverCert := dict "name" "server" "cert" .Values.certificates.certManager.serverCert "secret" .Values.certificates.serverSecretName }}
+{{- $certs := list $caCert $clientCert $serverCert -}}
+{{- range $cert := $certs }}
+{{- template "cert-manager.apiversion" $ }}
+kind: Certificate
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" $ }}-{{ $cert.name }}-cert
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" $ }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" $ | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" $ }}
+spec:
+  duration: {{ $cert.cert.duration }}
+  renewBefore: {{ $cert.cert.renewBefore }}
+  privateKey: {{ toYaml $cert.cert.privateKey | nindent 4 }}
+  commonName: {{ template "rancher-gmsa-account-provider.namespace" $ }}-{{ template "rancher-gmsa-account-provider.name" $ }}-{{ $cert.name }}
+{{- if eq $cert.name "ca" }}
+  isCA: true
+  issuerRef:
+    name: {{ template "rancher-gmsa-account-provider.name" $ }}-bootstrap
+    kind: Issuer
+{{- else }}
+  usages: {{ toYaml $cert.cert.usages | nindent 4 }}
+  dnsNames: {{ toYaml $cert.cert.dnsNames | nindent 4 }}
+  subject:
+    organizations:
+      - {{ template "rancher-gmsa-account-provider.name" $ }}
+  issuerRef:
+    name: {{ template "rancher-gmsa-account-provider.name" $ }}-ca
+    kind: Issuer
+{{- end }}
+  secretName: {{ $cert.secret }}
+---
+{{- end }}
+{{- end }}
