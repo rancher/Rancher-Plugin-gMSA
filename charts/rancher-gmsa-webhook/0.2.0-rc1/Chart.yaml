@@ -28,4 +28,4 @@ name: rancher-gmsa-webhook
 sources:
 - https://github.com/kubernetes-sigs/windows-gmsa
 type: application
-version: 0.2.0-alpha1
+version: 0.2.0-rc1
