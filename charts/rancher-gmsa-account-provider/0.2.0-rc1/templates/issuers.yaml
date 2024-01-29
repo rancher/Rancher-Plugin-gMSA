@@ -1,0 +1,22 @@
+{{- if .Values.certificates.certManager.enabled }}
+{{- template "cert-manager.apiversion" . }}
+kind: Issuer
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-bootstrap
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ template "rancher-gmsa-account-provider.name" . }}-ca
+  namespace: {{ template "rancher-gmsa-account-provider.namespace" . }}
+  labels: {{ include "rancher-gmsa-account-provider.labels" . | nindent 4 }}
+    app: {{ template "rancher-gmsa-account-provider.name" . }}
+spec:
+  ca:
+    secretName: {{ .Values.certificates.caSecretName }}
+{{- end }}
