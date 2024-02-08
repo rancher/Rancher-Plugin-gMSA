@@ -1,0 +1,61 @@
+certificates:
+  certManager:
+    # Enable cert manager integration. Cert manager should be already installed at the k8s cluster
+    enabled: true
+    version: ""
+  # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
+  caBundle: ""
+  # If cert-manager integration is disabled, upload certs data (ca.crt, tls.crt and tls.key) as k8s secretName in the namespace
+  secretName: gmsa-server-cert
+
+credential:
+  enabled: false
+  hostAccountConfig: {}
+    # pluginGUID: "" # CCG Plugin GUID
+    # portableCcgVersion: "1" # This needs to equal the current version of CCG which right now is '1'
+    # pluginInput: "" # Format of this field is dependent upon specific CCG Plugin
+  domainJoinConfig:
+    dnsName: "" # DNS Domain Name
+    dnsTreeName: "" # DNS Domain Name Root
+    guid: "" # GUID of Domain
+    machineAccountName: "" # Username of the GMSA account
+    netBiosName: "" # NETBIOS Domain Name
+    sid: "" # SID of Domain
+
+containerPort: "443"
+
+image:
+  repository: rancher/mirrored-gmsa-webhook-k8s-gmsa-webhook
+  tag: v0.7.0
+  imagePullPolicy: IfNotPresent
+
+# If true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
+setPodOs: true
+
+global:
+  cattle:
+    systemDefaultRegistry: ""
+  kubectl:
+    repository: rancher/kubectl
+    tag: v1.22.6
+    pullPolicy: IfNotPresent
+
+affinity: {}
+
+nodeSelector: {}
+
+podDisruptionBudget:
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 1
+
+podSecurityContext:
+  runAsNonRoot: false
+  # Currently, required to run as root due to port binding within the container.
+  runAsUser: 0
+
+replicaCount: 2
+
+securityContext: {}
+
+tolerations: []
