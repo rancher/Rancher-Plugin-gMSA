@@ -43,7 +43,7 @@ for cert in "gmsa-server-cert"; do
 done
 
 echo "Restarting gMSA Webhook..."
-kubectl -n $GMSA_SYSTEM_NAMESPACE rollout restart deployment/rancher-windows-gmsa
+kubectl -n $GMSA_SYSTEM_NAMESPACE rollout restart deployment/rancher-gmsa-webhook
 ```
 
 If you brought your own certificates, simply update the relevant `Secret` object in your cluster and run the final `kubectl rollout restart` command in the above script to achieve the same result.
