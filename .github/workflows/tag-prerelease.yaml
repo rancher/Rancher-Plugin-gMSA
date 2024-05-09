@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
         with:
           version: v1.55
       - name: go-format
@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
         with:
           version: v1.55
       - name: validate-go
@@ -58,25 +58,31 @@ jobs:
     needs: [linux-tests, windows-tests, chart-tests]
     runs-on: windows-2022
     env:
+      REPO: ${{ vars.REPO }}
       CROSS: true
       TAG: ${{ github.ref_name }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write # required for writing release artifacts
+      id-token: write # required for vault integration
     steps:
       - uses: actions/checkout@v1
+      - name: retrieve dockerhub credentials
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials username | DOCKER_USERNAME ;
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials password | DOCKER_PASSWORD
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
       - name: build-all-binaries
         run: bash ./scripts/build
       - name: package-binaries
         run: bash ./scripts/package
       - name: publish-containers
         run: bash ./scripts/publish
-      - uses: marvinpinto/action-automatic-releases@d68defdd11f9dcc7f52f35c1b7c236ee7513bcc1
-        with:
-          prerelease: true
-          repo_token: ${{ github.token }}
-          files: |
-            ./dist/*
-            LICENSE
+      - name: Create GH Release
+        run: gh release create ${{ github.ref_name }} --prerelease --verify-tag --generate-notes (get-item .\dist\*) LICENSE
