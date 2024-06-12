@@ -6,6 +6,25 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
 
 jobs:
+  fossa:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read FOSSA token
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/org/rancher/fossa/push token | FOSSA_API_KEY_PUSH_ONLY
+      - name: FOSSA scan
+        uses: fossas/fossa-action@main
+        with:
+          api-key: ${{ env.FOSSA_API_KEY_PUSH_ONLY }}
+          run-tests: false
+
   go-validation:
     runs-on: ubuntu-latest
     steps:
