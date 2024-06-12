@@ -13,7 +13,7 @@ jobs:
   go-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: golangci-lint
         uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
         with:
@@ -24,7 +24,7 @@ jobs:
   charts-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: validate-charts
         run: ./scripts/validate-charts
 
@@ -32,7 +32,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: test-go
         run: ./scripts/test
 
@@ -40,7 +40,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: test-go
         run: bash ./scripts/test
 
@@ -48,7 +48,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: test-charts
         run: ./scripts/test-charts
 
@@ -58,7 +58,7 @@ jobs:
     env:
       CROSS: true
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Build All Binaries
         run: bash ./scripts/build
       - name: Validate CI
@@ -70,7 +70,7 @@ jobs:
     env:
       REPO: ${{ vars.REPO }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: build-binaries
         run: bash ./scripts/build
       - name: build-containers
