@@ -3,6 +3,7 @@
 package status
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
@@ -31,7 +32,7 @@ func ensurePathExistsInRegistry(key registry.Key, path string) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	if err == registry.ErrNotExist {
+	if errors.Is(err, registry.ErrNotExist) {
 		return false, nil
 	}
 	return false, fmt.Errorf("failed to open registry key %s while determining CLSID existence: %v", path, err)
