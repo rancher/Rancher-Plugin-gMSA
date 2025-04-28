@@ -1,0 +1,10 @@
+annotations:
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/hidden: "true"
+  catalog.cattle.io/namespace: cattle-windows-gmsa-system
+  catalog.cattle.io/release-name: rancher-gmsa-webhook-crd
+apiVersion: v1
+description: Installs the CRDs for Windows GMSA.
+name: rancher-gmsa-webhook-crd
+type: application
+version: 0.2.1-rc1
