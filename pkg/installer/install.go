@@ -23,7 +23,7 @@ func Install() (err error) {
 
 	// Check if already up-to-date
 	if installationStatus.Installed() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 
@@ -90,7 +90,7 @@ func Install() (err error) {
 		}
 	}
 	if installationStatus.Installed() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 	return installationStatus.Error()
