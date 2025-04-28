@@ -4,7 +4,7 @@ global:
 
   kubectl:
     repository: rancher/kubectl
-    tag: v1.24.17
+    tag: v1.29.15
     pullPolicy: IfNotPresent
 
   imagePullSecrets: []
@@ -16,7 +16,7 @@ namespaceOverride: ""
 
 image:
   repository: rancher/gmsa-account-provider
-  tag: v0.2.0
+  tag: v0.2.1-rc1
   imagePullPolicy: IfNotPresent
 
 certificates:
