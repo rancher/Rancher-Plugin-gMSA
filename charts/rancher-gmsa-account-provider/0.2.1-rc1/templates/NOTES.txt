@@ -1,0 +1,8 @@
+{{ $.Chart.Name }} has been installed. Check its status by running:
+  kubectl --namespace {{ template "rancher-gmsa-account-provider.namespace" $ }} get pods -l "release={{ template "rancher-gmsa-account-provider.name" $ }}"
+
+Make sure that you create impersonation secret(s) in this namespace using the following format:
+  USERNAME='<username>'
+  PASSWORD='<password>'
+  DOMAIN_NAME='<domain-name>'
+  kubectl create --namespace {{ template "rancher-gmsa-account-provider.namespace" $ }} generic {{ template "rancher-gmsa-account-provider.name" $ }}-impersonation-account --from-literal=username="$USERNAME" --from-literal=password="$PASSWORD" --from-literal=domainName="$DOMAIN_NAME"
