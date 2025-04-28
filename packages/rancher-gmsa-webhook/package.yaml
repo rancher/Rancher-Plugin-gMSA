@@ -1,7 +1,7 @@
 url: https://github.com/kubernetes-sigs/windows-gmsa.git
 subdirectory: charts/gmsa
-commit: 37b14194707592359a08f7c78c118fb26c4470b1
-version: 0.2.0
+commit: 529ad47e405dfc539d14f32401d3ca3d5d50d254
+version: 0.2.1-rc1
 additionalCharts:
   - workingDir: charts-crd
     crdOptions:

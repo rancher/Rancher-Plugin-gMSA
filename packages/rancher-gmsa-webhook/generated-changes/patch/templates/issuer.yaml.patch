@@ -1,8 +1,0 @@
---- charts-original/templates/issuer.yaml
-+++ charts/templates/issuer.yaml
-@@ -22,4 +22,4 @@
-   labels: {{ include "gmsa.chartref" . | nindent 4 }}
- spec:
-   selfSigned: {}
--{{- end -}}
-+{{- end }}

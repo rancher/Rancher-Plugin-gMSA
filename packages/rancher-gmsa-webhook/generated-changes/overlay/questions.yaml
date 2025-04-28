@@ -61,6 +61,12 @@ questions:
         description: The input given to the CCG plugin. Refer to plugin specific documentation on expected format for this field.
         type: string
         required: true
+  - variable: randomHostname
+    label: Random Hostname Generation
+    default: true
+    description: "Configures the webhook to automatically randomize gMSA pod hostnames to avoid potential domain trust issues when scaling gMSA enabled workloads."
+    type: boolean
+    group: "Random Host Name Generation"
   - variable: certificates.certManager.enabled
     default: true
     description: Use cert-manager to generate certificates for the webhook
@@ -87,9 +93,8 @@ questions:
         default: 2
         label: Minimum Available
         type: int
-        required: optional
+        required: false
       - variable: podDisruptionBudget.maxUnavailable
-        default: 1
         label: Maximum Unavailable
         type: int
-        required: optional
+        required: false
