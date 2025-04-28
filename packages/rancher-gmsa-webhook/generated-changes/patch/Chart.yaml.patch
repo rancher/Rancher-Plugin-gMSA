@@ -1,6 +1,6 @@
 --- charts-original/Chart.yaml
 +++ charts/Chart.yaml
-@@ -1,13 +1,31 @@
+@@ -1,13 +1,26 @@
 +annotations:
 +  catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
 +  catalog.cattle.io/certified: rancher
@@ -14,9 +14,9 @@
 +  catalog.cattle.io/rancher-version: '>= 2.7.0-0'
 +  catalog.cattle.io/release-name: rancher-gmsa-webhook
  apiVersion: v2
- appVersion: 0.7.0
--description: Windows GMSA Configuration
-+description: Windows gMSA Configuration
+-appVersion: 0.12.1
++appVersion: 0.13.0
+ description: Windows GMSA Configuration
 +icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
  keywords:
  - Windows
@@ -24,14 +24,9 @@
  - GMSA
  - Active Directory
 -name: gmsa
-+maintainers:
-+- email: harrison.affel@suse.com
-+  name: Harrison Affel
-+- email: arvind.iyengar@suse.com
-+  name: Arvind Iyengar
 +name: rancher-gmsa-webhook
  sources:
  - https://github.com/kubernetes-sigs/windows-gmsa
  type: application
--version: 0.7.2
-+version: 0.1.0
+-version: 0.12.1
++version: 0.2.1-rc1

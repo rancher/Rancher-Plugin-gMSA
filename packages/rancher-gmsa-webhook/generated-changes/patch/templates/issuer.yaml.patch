@@ -1,8 +1,9 @@
 --- charts-original/templates/issuer.yaml
 +++ charts/templates/issuer.yaml
-@@ -22,4 +22,4 @@
-   labels: {{ include "gmsa.chartref" . | nindent 4 }}
- spec:
-   selfSigned: {}
+@@ -49,4 +49,4 @@
+     kind: ClusterIssuer
+     group: cert-manager.io
+ ---
 -{{- end -}}
+\ No newline at end of file
 +{{- end }}
