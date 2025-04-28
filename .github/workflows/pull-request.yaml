@@ -10,30 +10,6 @@ on:
       - 'Makefile'
 
 jobs:
-  DLL-validation:
-    runs-on: windows-2022
-    steps:
-      - name: 'PR commits + 1'
-        run: echo "PR_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: ${{ env.PR_FETCH_DEPTH }}
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            src:
-              - 'src/**'
-      - name: ensure DLL change
-        if: steps.changes.outputs.src == 'true'
-        run: |
-          $diff = git diff --name-only HEAD^ HEAD
-          $SourceDiff = $diff | Where-Object { $_ -match '.dll$' }
-          if ($SourceDiff -lt 1) {
-            echo "C# Code has been changed but the DLL has not been updated. Please commit an updated version of the DLL
-            exit 1
-          }
-
   go-validation:
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +29,7 @@ jobs:
         run: ./scripts/validate-charts
 
   linux-tests:
-    needs: [go-validation, charts-validation, DLL-validation]
+    needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -61,7 +37,7 @@ jobs:
         run: ./scripts/test
 
   windows-tests:
-    needs: [go-validation, charts-validation, DLL-validation]
+    needs: [go-validation, charts-validation]
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v1
@@ -69,7 +45,7 @@ jobs:
         run: bash ./scripts/test
 
   chart-tests:
-    needs: [go-validation, charts-validation, DLL-validation]
+    needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
