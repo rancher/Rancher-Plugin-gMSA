@@ -238,7 +238,7 @@ entries:
   - annotations:
       catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
       catalog.cattle.io/certified: rancher
-      catalog.cattle.io/display-name: Windows gMSA
+      catalog.cattle.io/display-name: Windows gMSA Webhook
       catalog.cattle.io/experimental: "true"
       catalog.cattle.io/kube-version: '>= 1.21.0-0'
       catalog.cattle.io/namespace: cattle-windows-gmsa-system
@@ -249,9 +249,10 @@ entries:
       catalog.cattle.io/release-name: rancher-gmsa-webhook
     apiVersion: v2
     appVersion: 0.13.0
-    created: "2025-04-28T15:57:20.086183-04:00"
-    description: Windows GMSA Configuration
-    digest: 64844f5a25f4e16176a484a554c9ded511f0be3e19a5e89192926c7bb3ff8dbf
+    created: "2025-04-29T11:20:51.122297-04:00"
+    description: The Windows gMSA Admission Webhook assists in associating gMSA accounts
+      with Windows workloads
+    digest: 267a42220708ed0280e831dddb9666259ff324e3ac58094aacabb7965688c5fc
     icon: https://charts.rancher.io/assets/logos/windows-gmsa.svg
     keywords:
     - Windows
