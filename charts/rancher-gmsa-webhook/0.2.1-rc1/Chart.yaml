@@ -20,6 +20,9 @@ keywords:
 - Windows GMSA
 - GMSA
 - Active Directory
+maintainers:
+- email: harrison.affel@gmail.com
+  name: Harrison
 name: rancher-gmsa-webhook
 sources:
 - https://github.com/kubernetes-sigs/windows-gmsa

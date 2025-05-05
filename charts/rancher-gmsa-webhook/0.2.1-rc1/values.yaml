@@ -38,10 +38,6 @@ setPodOs: true
 global:
   cattle:
     systemDefaultRegistry: ""
-  kubectl:
-    repository: rancher/kubectl
-    tag: v1.29.15
-    pullPolicy: IfNotPresent
 
 affinity: {}
 nodeSelector: {}
