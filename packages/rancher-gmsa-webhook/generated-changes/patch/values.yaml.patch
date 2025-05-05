@@ -1,41 +1,26 @@
 --- charts-original/values.yaml
 +++ charts/values.yaml
-@@ -2,7 +2,7 @@
-   certManager:
-     # Enable cert manager integration. Cert manager should be already installed at the k8s cluster
-     enabled: true
--    version: "v1.10.1"
-+    version: ""
-   # If cert-manager integration is disabled, add self-signed ca.crt in base64 format
-   caBundle: ""
-   # If cert-manager integration is disabled, upload certs data (ca.crt, tls.crt and tls.key) as k8s secretName in the namespace
-@@ -25,7 +25,7 @@
+@@ -28,15 +28,16 @@
  containerPort: "443"
  
  image:
 -  repository: registry.k8s.io/gmsa-webhook/k8s-gmsa-webhook
+-  tag: v0.12.1
 +  repository: rancher/mirrored-gmsa-webhook-k8s-gmsa-webhook
-   tag: v0.7.0
++  tag: v0.13.0
    imagePullPolicy: IfNotPresent
  
-@@ -33,16 +33,29 @@
+ # If true, will add os fields to pod specs for K8s versions where feature is in beta (v1.24+)
  setPodOs: true
  
  global:
 -  systemDefaultRegistry: ""
 +  cattle:
 +    systemDefaultRegistry: ""
-+  kubectl:
-+    repository: rancher/kubectl
-+    tag: v1.22.6
-+    pullPolicy: IfNotPresent
  
  affinity: {}
-+
  nodeSelector: {}
-+
- podDisruptionBudget:
-   enabled: false
+@@ -45,10 +46,14 @@
    # minAvailable: 1
    # maxUnavailable: 1
  
@@ -46,7 +31,9 @@
 +  runAsUser: 0
 +
  replicaCount: 2
-+
  securityContext: {}
-+
  tolerations: []
+ qps: 30.0
+ burst: 50
+-randomHostname: false
++randomHostname: true

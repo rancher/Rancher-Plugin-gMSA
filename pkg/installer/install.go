@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -13,7 +14,7 @@ import (
 func Install() (err error) {
 	installationStatus, err := status.CheckInstallationStatus(embedded.DLL)
 	if err != nil {
-		if err != status.ErrNotWindows {
+		if !errors.Is(err, status.ErrNotWindows) {
 			return fmt.Errorf("unable to determine current status of plugin: %s", err)
 		}
 		// only put a warning out if this is not a Windows host
@@ -22,7 +23,7 @@ func Install() (err error) {
 
 	// Check if already up-to-date
 	if installationStatus.Installed() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 
@@ -84,12 +85,12 @@ func Install() (err error) {
 
 	installationStatus, err = status.CheckInstallationStatus(embedded.DLL)
 	if err != nil {
-		if err != status.ErrNotWindows {
+		if !errors.Is(err, status.ErrNotWindows) {
 			return fmt.Errorf("unable to determine final status of plugin: %s", err)
 		}
 	}
 	if installationStatus.Installed() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 	return installationStatus.Error()

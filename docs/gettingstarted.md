@@ -2,7 +2,7 @@
 
 Installing Rancher gMSA CCG Plugin requires the installation of two Helm charts onto your Windows cluster:
 
-1. [`rancher-gmsa-plugin-installer`](../charts/rancher-gmsa-plugin-installer): install the CCG Plugin onto each Windows host in your cluster
+1. [`rancher-gmsa-plugin-installer`](../charts/rancher-gmsa-plugin-installer): installs the CCG Plugin onto each Windows host in your cluster
 2. [`rancher-gmsa-account-provider`](../charts/rancher-gmsa-account-provider): serves as a local proxy on each host for the CCG Plugin to grab a Secret from the Kubernetes cluster
 
 Once installed, you may also want to install [`rancher-gmsa-webhook`](../charts/rancher-gmsa-webhook) (and `rancher-gmsa-webhook-crd`), which adds [admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) on Pods to fill out gMSA credentials based on configuration stored in a `GMSACredentialSpec`. This will allow your Pods to specify that they should run as a specific gMSA account.
@@ -10,7 +10,7 @@ Once installed, you may also want to install [`rancher-gmsa-webhook`](../charts/
 ## Prerequisites
 
 - A Kubernetes cluster with Windows nodes
-  - Must be 1.24+
+  - Must be Kubernetes 1.24+
   - Must come with [`cert-manager`](https://cert-manager.io/docs/installation) and its CRDs installed
   - Each node must be running [`containerd`](https://containerd.io) 1.7+ as the runtime
   - All Windows hosts must be running `Windows Server 2019` or `Windows Server 2022`. No other versions are supported.
@@ -24,11 +24,12 @@ Once installed, you may also want to install [`rancher-gmsa-webhook`](../charts/
 
 1. Ensure `cert-manager` has already been installed onto your Windows cluster
 2. Navigate to `Apps & Marketplace -> Repositories` in your target downstream cluster and create a Repository that points to a `Git repository containing Helm chart or cluster template definitions` where the `Git Repo URL` is `https://github.com/rancher/Rancher-Plugin-gMSA` and the `Git Branch` is `main`
-3. Navigate to `Apps & Marketplace -> Charts`; you should see three charts under the Repository you created:  `Windows GMSA`, `Rancher gMSA CCG Plugin`, and `Rancher gMSA Account Provider`.
+3. Navigate to `Apps & Marketplace -> Charts`; you should see three charts under the Repository you created:  `Windows GMSA Webhook`, `Rancher gMSA CCG Plugin`, and `Rancher gMSA Account Provider`.
 4. Install `Rancher gMSA CCG Plugin` 
 5. Install `Rancher gMSA Account Provider`
+6. Optionally install `Windows GMSA Webhook`
 
-> **Note**: You can also install `Windows GMSA` from this new Repository.
+> **Note**: While installing the `Windows GMSA Webhook` is optional, it is strongly recommended as it greatly improves the experience of working with multiple gMSAs within Kubernetes. 
 
 ### In a normal Kubernetes cluster (via running Helm 3 locally)
 
@@ -76,7 +77,7 @@ data:
   domainName: rancher.ad.com
 ```
 
-The `GMSACredentialSpec` is used to define the Active Directory Domain and gMSA account that a workload should utilize. It also provides input to the Rancher CCG Plugin as to what user account should be used to authenticate with Active Directory. In a single domain environment, you may only need a single user account secret, but will need a number of `GMSACredentialSpec`'s depending on the number of gMSA accounts. 
+If you have installed the gMSA Webhook, the associated `GMSACredentialSpec` CR is used to define the Active Directory Domain and gMSA account that a workload should utilize. It also provides input to the Rancher CCG Plugin as to what user account should be used to authenticate with Active Directory. In a single domain environment, you may only need a single user account secret, but will need a number of `GMSACredentialSpec`'s depending on the number of gMSA accounts. 
 
 Here's an example of a `GMSACredentialSpec` which targets a gMSA account named `GMSA1` in an Active Directory Domain titled `rancher.ad.com`. This example utilizes the Rancher CCG Plugin to perform the Active Directory authorization required to obtain the gMSA account password, through the values supplied in the `HostAccountConfig` field. 
 
@@ -107,7 +108,7 @@ credspec:
     Sid: S-1-5-21-2126449477-2524075714-3094792973 # SID of the Active Directory Domain
 ```
 
-Once you've created the `GMSACredentialSpec` (as well as any RBAC required to utilize the object), you can start to create gMSA workloads. Each workload which intends to utilize a gMSA account must include a value within the pods security context. For example, if we wanted to utilize the example `GMSACredentialSpec` we've just created within a deployment, the pod security context would need to look like this:
+Once you've created the `GMSACredentialSpec` (as well as any RBAC required to utilize the object, such as Service Accounts, Roles, and Role Bindings), you can start to create gMSA workloads. Each workload which intends to utilize a gMSA account must include a value within the pods security context. For example, if we wanted to utilize the example `GMSACredentialSpec` we've just created within a deployment, the pod security context would need to look like this:
 ```yaml 
 securityContext:
   windowsOptions:
@@ -116,6 +117,49 @@ securityContext:
 The gMSA web-hook will automatically expand this reference onto all pods rolled-out, allowing the gMSA authorization process to occur. 
 
 Assuming everything has been installed and configured correctly for your desired Active Directory domain, the workload should deploy as normal and enjoy all the permissions given to the gMSA account.  
+
+#### Required RBAC Configuration when using GMSACredentialSpec Resources
+
+In order for a workload to utilize a `gmsaCredentialSpecName` field within its security context, the workload must be deployed using a service account with at least the `use` verb allowed for `GMSACredentialSpec` CRs. This is a requirement of the GMSA Webhook, and attempts to create workloads which do not specify a service account which provides this permission will be denied. 
+
+Here's an example of a Service account, ClusterRole, and RoleBinding, that can be used to properly deploy workloads with a security context that specifies the `gmsaCredentialSpecName` field.
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: windows-gmsa-serviceaccount
+  namespace: default
+```
+
+```yaml 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: windows-gmsa-role
+rules:
+- apiGroups: ["windows.k8s.io"]
+  resources: ["gmsacredentialspecs"]
+  verbs: ["use"]
+  resourceNames: [""]
+```
+
+```yaml 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: windows-gmsa-webserver
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: windows-gmsa-serviceaccount
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: windows-gmsa-role
+  apiGroup: rbac.authorization.k8s.io
+```
+
 
 #### Verifying Account Configuration
 
@@ -163,6 +207,14 @@ helm template -n cattle-windows-gmsa-system windows-ad-setup \
 1. Ensure that the init container deployed with each pod of the `rancher-gmsa-plugin-installer` chart successfully completes and does not log any errors.
 2. Ensure that all pods spawned from the `rancher-gmsa-account-provider` deamon set have started properly and do not log any errors 
 3. Deploy a Windows workload which leverages a gMSA account, ensure that it successfully transitions to 'Running'
+
+### Alternative Means of installing the CCGRKC DLL 
+
+In environments where you have control over the virtual machine image used by your Windows nodes, it may be beneficial to "bake in" the CCGRKC DLL into your image. Doing so will not only allow you to skip the installation of the `rancher-gmsa-plugin-installer` chart, it will also ensure that gMSA workloads can be immediately scheduled onto Windows nodes as they are added to the cluster. When taking this approach, the `rancher-gmsa-plugin-installer` can later be used to update the DLL version automatically. 
+
+
+To manually configure the CCGRKC DLL when creating a virtual machine image, you can refer to the [script](../pkg/installer/embedded/scripts/install-plugin.ps1) utilized by the `rancher-gmsa-plugin-installer` chart itself.  
+
 
 ## Uninstalling the Rancher gMSA CCG Plugin
 

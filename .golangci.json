@@ -14,7 +14,7 @@
 		"skip-files": [
 			"/zz_generated_"
 		],
-		"deadline": "5m"
+		"timeout": "10m"
 	},
     "issues": {
         "exclude-rules": [

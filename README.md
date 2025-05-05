@@ -16,6 +16,10 @@ On a domain controller, a standard user account  needs to be created. This user 
 > 
 > The primary audience for the Terraform in the `rancher/windows` repository is **members of the Rancher Windows team** who require these modules to reproduce setups that mimic supported environments; however, it can be used as a reference architecture for how to set up a gMSA environment in Kubernetes.
 
+## Getting Started
+
+For more information, see the [Getting Started guide](docs/gettingstarted.md).
+
 ## Who needs this CCG Plugin?
 
 Anyone who adds Windows hosts onto Kubernetes clusters who would like to schedule workloads that utilize gMSAs to communicate with Active Directory.
@@ -55,10 +59,6 @@ The connection details are automatically installed onto the host by the Account 
 To install the CCGRKC Plugin DLL, this repository also provides a Plugin Installer.
 
 ![](./docs/diagrams/simple-diagram.png)
-
-## Getting Started
-
-For more information, see the [Getting Started guide](docs/gettingstarted.md).
 
 ## Developing
 
