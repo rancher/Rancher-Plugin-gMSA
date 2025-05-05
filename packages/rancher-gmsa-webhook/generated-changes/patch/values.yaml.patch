@@ -1,6 +1,6 @@
 --- charts-original/values.yaml
 +++ charts/values.yaml
-@@ -28,15 +28,20 @@
+@@ -28,15 +28,16 @@
  containerPort: "443"
  
  image:
@@ -17,14 +17,10 @@
 -  systemDefaultRegistry: ""
 +  cattle:
 +    systemDefaultRegistry: ""
-+  kubectl:
-+    repository: rancher/kubectl
-+    tag: v1.29.15
-+    pullPolicy: IfNotPresent
  
  affinity: {}
  nodeSelector: {}
-@@ -45,10 +50,14 @@
+@@ -45,10 +46,14 @@
    # minAvailable: 1
    # maxUnavailable: 1
  

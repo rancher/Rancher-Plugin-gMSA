@@ -1,6 +1,6 @@
 --- charts-original/Chart.yaml
 +++ charts/Chart.yaml
-@@ -1,13 +1,27 @@
+@@ -1,13 +1,30 @@
 +annotations:
 +  catalog.cattle.io/auto-install: rancher-gmsa-webhook-crd=match
 +  catalog.cattle.io/certified: rancher
@@ -26,6 +26,9 @@
  - GMSA
  - Active Directory
 -name: gmsa
++maintainers:
++- email: harrison.affel@gmail.com
++  name: Harrison
 +name: rancher-gmsa-webhook
  sources:
  - https://github.com/kubernetes-sigs/windows-gmsa
