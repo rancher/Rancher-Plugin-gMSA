@@ -27,9 +27,9 @@ Once installed, you may also want to install [`rancher-gmsa-webhook`](../charts/
 3. Navigate to `Apps & Marketplace -> Charts`; you should see three charts under the Repository you created:  `Windows GMSA Webhook`, `Rancher gMSA CCG Plugin`, and `Rancher gMSA Account Provider`.
 4. Install `Rancher gMSA CCG Plugin` 
 5. Install `Rancher gMSA Account Provider`
-6. Optionally install `Rancher GMSA Webhook`
+6. Optionally install `Windows GMSA Webhook`
 
-> **Note**: While installing the `Rancher GMSA Webhook` is optional, it is strongly recommended as it greatly improves the experience of working with multiple gMSAs within Kubernetes. 
+> **Note**: While installing the `Windows GMSA Webhook` is optional, it is strongly recommended as it greatly improves the experience of working with multiple gMSAs within Kubernetes. 
 
 ### In a normal Kubernetes cluster (via running Helm 3 locally)
 
@@ -210,7 +210,7 @@ helm template -n cattle-windows-gmsa-system windows-ad-setup \
 
 ### Alternative Means of installing the CCGRKC DLL 
 
-In environments where you have control over the virtual machine image used your Windows nodes, it may be beneficial to "bake in" the CCGRKC DLL into your image. Doing so will not only allow you to skip the installation of the `rancher-gmsa-plugin-installer` chart, it will also ensure that gMSA workloads can be immediately scheduled onto Windows nodes as they are added to the cluster. When taking this approach, the `rancher-gmsa-plugin-installer` can later be used to update the DLL version automatically. 
+In environments where you have control over the virtual machine image used by your Windows nodes, it may be beneficial to "bake in" the CCGRKC DLL into your image. Doing so will not only allow you to skip the installation of the `rancher-gmsa-plugin-installer` chart, it will also ensure that gMSA workloads can be immediately scheduled onto Windows nodes as they are added to the cluster. When taking this approach, the `rancher-gmsa-plugin-installer` can later be used to update the DLL version automatically. 
 
 
 To manually configure the CCGRKC DLL when creating a virtual machine image, you can refer to the [script](../pkg/installer/embedded/scripts/install-plugin.ps1) utilized by the `rancher-gmsa-plugin-installer` chart itself.  
