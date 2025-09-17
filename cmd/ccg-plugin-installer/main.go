@@ -4,15 +4,15 @@ import (
 	_ "net/http/pprof"
 	"time"
 
+	cli "github.com/rancher/Rancher-Plugin-gMSA/cmd/util"
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/installer"
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/version"
-	command "github.com/rancher/wrangler-cli"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
-	debugConfig command.DebugConfig
+	debugConfig cli.DebugConfig
 )
 
 func main() {
@@ -24,19 +24,19 @@ func main() {
 		},
 	}
 	cmd.AddCommand(
-		command.AddDebug(command.Command(&CCGPluginInstaller{}, cobra.Command{
+		cli.Command(&CCGPluginInstaller{}, cobra.Command{
 			Use:          "install",
 			Aliases:      []string{"upgrade"},
 			Short:        "Installs or upgrades the Rancher CCG Plugin as a DLL on your host",
 			SilenceUsage: true,
-		}), &debugConfig),
-		command.AddDebug(command.Command(&CCGPluginUninstaller{}, cobra.Command{
+		}, &debugConfig),
+		cli.Command(&CCGPluginUninstaller{}, cobra.Command{
 			Use:          "uninstall",
 			Short:        "Uninstall the Rancher CCG Plugin",
 			SilenceUsage: true,
-		}), &debugConfig),
+		}, &debugConfig),
 	)
-	command.Main(cmd)
+	cli.Main(cmd)
 }
 
 type CCGPluginInstaller struct {
@@ -44,8 +44,6 @@ type CCGPluginInstaller struct {
 }
 
 func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
-	debugConfig.MustSetupDebug()
-
 	err := installer.Install()
 	executeTimeout(i.Timeout)
 	return err
@@ -56,8 +54,6 @@ type CCGPluginUninstaller struct {
 }
 
 func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
-	debugConfig.MustSetupDebug()
-
 	err := installer.Uninstall()
 	executeTimeout(i.Timeout)
 	return err
