@@ -40,7 +40,7 @@ Scan through our [existing issues](https://github.com/rancher/Rancher-Plugin-gMS
 - Using the command line:
   - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
 
-3. Install or update to **Go 1.17**. For more information, see [the development guide](docs/developing.md).
+3. Install or update to **Go 1.24**. For more information, see [the development guide](docs/developing.md).
 
 4. Create a working branch and start with your changes!
 
@@ -48,9 +48,13 @@ Scan through our [existing issues](https://github.com/rancher/Rancher-Plugin-gMS
 
 Commit the changes once you are happy with them. See [Atom's contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md#git-commit-messages) to know how to use emoji for commit messages.
 
-### Pull Request
+### Open Pull Requests
 
-When you're finished with the changes, create a pull request, also known as a PR.
+> *NOTE*
+> 
+> This repository maintains separate release branches for each major and minor version, in the format of `release/vX.Y` (e.g. `release/v0.2`). Primary development is done on the `main` branch. All PRs should be first raised against the `main` branch, unless they exclusively relate to a specific issue within one of the release branches. PRs are then ported into relevant release branches as needed.  
+
+When you're finished with the changes, create a pull request, also known as a PR, targing the `main` branch
 - Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
 - Enable the checkbox to [allow maintainer edits](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork) so the branch can be updated for a merge.
 Once you submit your PR, a Rancher team member will review your proposal. We may ask questions or request for additional information.

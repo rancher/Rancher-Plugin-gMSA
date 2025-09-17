@@ -3,7 +3,7 @@ set -e
 
 cd $(dirname $0)/..
 
-go generate
+go generate ./...
 
 source ./scripts/version
 

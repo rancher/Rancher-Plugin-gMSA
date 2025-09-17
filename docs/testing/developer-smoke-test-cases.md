@@ -22,8 +22,7 @@ Regardless of cluster configurations, the following prerequisites must be met:
 + Windows worker nodes running one of the following OS versions: `Windows Server 2019`, `Windows Server 2022`, `Windows Server Core 2019`, `Windows Server Core 2022`. No other versions are supported. 
 + An Active Directory Domain which can be contacted by the Windows Worker nodes and workloads
 + An Active Directory impersonation (user) account and gMSA account, both of which are in the same security group
-+ The latest version of the Rancher gMSA Web-hook chart installed (v3+)
-    + Currently, the gMSA Web-Hook chart offered by Rancher **does not contain the required changes to support non-domain joined nodes**. This chart will be updated soon, in the meantime you should use the following repository `harrisonwaffel/charts` and test against the `update-gmsa` branch (this can be done by configuring a new app repository in the Rancher UI).
++ The latest version of the Rancher gMSA Web-hook chart installed (v3+) 
   + During installation, configure a `GMSACredentialSpec` for your Domain and gMSA Account. Ensure that the `HostAccountConfig` field is enabled and properly configured for the Rancher CCG gMSA Plugin, and that the `PluginInput` points to a valid secret within the Account Providers namespace.
     + As a reference, the Rancher gMSA Plugin GUID is `{e4781092-f116-4b79-b55e-28eb6a224e26}`. You must ensure that the value is wrapped in curly braces, otherwise CCG will not invoke the plugin.
     + As a reference, the Rancher gMSA Plugin DLL expects a `PluginInput` format of `<ACCOUNT_PROVIDER_NAMESPACE>:<SECRET>`, where `ACCOUNT_PROVIDER_NAMESPACE` is a namespace containing an Account Provider deployment. 
@@ -56,14 +55,14 @@ We currently do **not** provide support for or test against the following enviro
 
 ## Configure RBAC for your service account
 
-In order to test the Account Provider you must first install the GMSA Web-hook, which will provide the `GMSACredentialSpec` CRD  expand the contents of the resource onto pods. The web-hook chart will deploy a purpose built `ClusterRole` which permits access to all `GMSACredentialSpec` resources. However, the default `ClusterRoleBinding` deployed by the GMSA Web-hook chart only grants access to these resources to the service account used by the GMSA web-hook. In order to create workloads which utilize a `GMSACredentialSpec`, but run under a different service account, an additional `Role` and `RoleBinding` needs to be created for the service account you intend to use for testing.
+In order to test the Account Provider you must first install the GMSA Web-hook, which will provide the `GMSACredentialSpec` CRD and will expand the contents of the resource onto pods. The web-hook chart will deploy a purpose built `ClusterRole` which permits access to all `GMSACredentialSpec` resources. However, the default `ClusterRoleBinding` deployed by the GMSA Web-hook chart only grants access to these resources to the service account used by the GMSA web-hook. In order to create workloads which utilize a `GMSACredentialSpec`, but run under a different service account, an additional `Role` and `RoleBinding` needs to be created for the service account you intend to use for testing.
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: <GET_CREDENTIAL_SPEC_ROLE_NAME>
-  namespace: <GMSA_ENABLED_WORKLOAD_NAMESPACE>
+  name: get-gmsa-spec
+  namespace: cattle-wins-system
 rules:
   - apiGroups:
       - windows.k8s.io
@@ -75,12 +74,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: <GET_CREDENTIAL_SPEC_ROLE_BINDING_NAME>
-  namespace: <GMSA_ENABLED_WORKLOAD_NAMESPACE>
+  name: get-gmsa-spec-rb
+  namespace: cattle-wins-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io/v1
   kind: Role
-  name: <GET_CREDENTIAL_SPEC_ROLE_NAME>
+  name: get-gmsa-spec
 subjects:
   - kind: ServiceAccount
     name: <YOUR_SERVICE_ACCOUNT_NAME>
@@ -111,7 +110,7 @@ metadata:
   labels:
     app: gmsa-demo
   name: gmsa-demo
-  namespace: cattle-windows-gmsa-system
+  namespace: cattle-wins-system
 data:
   run.ps1: |
     $ErrorActionPreference = "Stop"
@@ -143,7 +142,7 @@ metadata:
   labels:
     app: gmsa-demo
   name: gmsa-demo
-  namespace: cattle-windows-gmsa-system
+  namespace: cattle-wins-system
 spec:
   replicas: 1
   selector:
@@ -154,20 +153,16 @@ spec:
       labels:
         app: gmsa-demo
     spec:
-      dnsConfig:
-        nameservers:
-          - <ACTIVE_DIRECTORY_DOMAIN_CONTROLLER_IP>
-        searches:
-          - <YOUR_ACTIVE_DIRECTORY_DOMAIN_NAME>
-      serviceAccount: rancher-windows-gmsa
-      serviceAccountName: rancher-windows-gmsa
-      securityContext:
-        windowsOptions:
-          gmsaCredentialSpecName: <YOUR_GMSACREDSPEC_NAME>
+      serviceAccountName: gmsa
       containers:
         - name: iis
-          image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2022
+          image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019
           imagePullPolicy: IfNotPresent
+          securityContext:
+            windowsOptions:
+              gmsaCredentialSpecName: gmsa1-ccg
+          ports:
+            - containerPort: 80
           command:
             - powershell
           args:
@@ -190,7 +185,7 @@ metadata:
   labels:
     app: gmsa-demo
   name: gmsa-demo
-  namespace: cattle-windows-gmsa-system
+  namespace: cattle-wins-system
 spec:
   ports:
     - port: 80
@@ -223,14 +218,15 @@ The following procedure should be performed against all supported environments a
    1. `nltest /parentdomain` should return the domain name configured within the GMSACredentialSpec 
    2. `nltest /query` should return `NERR_Success`, indicating no error was encountered contacting the domain controller
    3. `nltest /sc_query:<YOUR_DOMAIN_NAME>` should return `NERR_Success`, indicating no error was encountered contacting the domain controller
-7. Delete the sample Workload
-8. Uninstall the Rancher gMSA Account Provider Chart
-9. Start to remove the CCG Plugin Installer Helm application
+7. Connect to the service over the newly created node port, and login using an active directory user when prompted. This user should be different from the GMSA impersonation account username and password.
+8. Delete the sample Workload
+9. Uninstall the Rancher gMSA Account Provider Chart
+10. Start to remove the CCG Plugin Installer Helm application
    1. First, modify the Helm release and change the `action` field to `uninstall` to uninstall the plugin
    2. Wait for the new ccg plugin installer container to deploy and initialize 
    3. Remove the Helm release from the cluster
-10. SSH into each node, and ensure that the files listed in `Expected Files For The Plugin Installer Post Uninstall` exist 
-11. SSH into each node, and Run the `cleanup.ps1` script and ensure that the files listed in `Expected Files For The Plugin Installer Post Installer` **no longer exist.** 
+11. SSH into each node, and ensure that the files listed in `Expected Files For The Plugin Installer Post Uninstall` exist 
+12. SSH into each node, and Run the `cleanup.ps1` script and ensure that the files listed in `Expected Files For The Plugin Installer Post Installer` **no longer exist.** 
 
 ## Expected Files For The Plugin Installer Post Install
 After initial installation, the following files should exist on each host:
@@ -260,4 +256,9 @@ After installation, the following files should exist on the host:
 `/var/lib/rancher/gmsa/<NAMESPACE>/ssl/ca/ca.crt`
 
 ## Expected Files For The Account Provider Post Uninstall
-All the previously listed files should no longer exist once the Account Provider chart is uninstalled from the cluster. The uninstallation process is handled via a [Helm Hook](https://helm.sh/docs/topics/charts_hooks/). If these resources remain on a Windows node post uninstall of the chart, then there is an issue with the Helm Hook logic which must be addressed. 
+All the previously listed files should no longer exist once the Account Provider chart is uninstalled from the cluster. The uninstallation process is handled via a [Helm Hook](https://helm.sh/docs/topics/charts_hooks/). If these resources remain on a Windows node post uninstall of the chart, then there is an issue with the Helm Hook logic which must be addressed.
+
+
+## Additional Assistance
+
+If you need additional debugging assistance, you can refer to this documentation https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/gmsa-troubleshooting

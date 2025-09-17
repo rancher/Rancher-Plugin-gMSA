@@ -22,7 +22,7 @@ func Uninstall() error {
 	}
 
 	if installationStatus.Uninstalled() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 
@@ -53,7 +53,7 @@ func Uninstall() error {
 		return fmt.Errorf("unable to determine final status of plugin: %s", err)
 	}
 	if installationStatus.Uninstalled() {
-		logrus.Infof(installationStatus.String())
+		logrus.Info(installationStatus.String())
 		return nil
 	}
 	return installationStatus.Error()
