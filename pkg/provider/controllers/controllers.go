@@ -9,11 +9,11 @@ import (
 	"github.com/rancher/lasso/pkg/cache"
 	"github.com/rancher/lasso/pkg/client"
 	"github.com/rancher/lasso/pkg/controller"
-	"github.com/rancher/wrangler/pkg/generated/controllers/core"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
-	"github.com/rancher/wrangler/pkg/generic"
-	"github.com/rancher/wrangler/pkg/k8scheck"
-	"github.com/rancher/wrangler/pkg/start"
+	"github.com/rancher/wrangler/v3/pkg/generated/controllers/core"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
+	"github.com/rancher/wrangler/v3/pkg/generic"
+	"github.com/rancher/wrangler/v3/pkg/k8scheck"
+	"github.com/rancher/wrangler/v3/pkg/start"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
@@ -52,7 +52,7 @@ func Run(ctx context.Context, namespace string, client *rest.Config) (corecontro
 }
 
 func controllerFactory(namespace string, rest *rest.Config) (controller.SharedControllerFactory, error) {
-	rateLimit := workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second)
+	rateLimit := workqueue.NewTypedItemExponentialFailureRateLimiter[any](5*time.Millisecond, 60*time.Second)
 	clientFactory, err := client.NewSharedClientFactory(rest, nil)
 	if err != nil {
 		return nil, err
@@ -75,19 +75,18 @@ func newContext(namespace string, client *rest.Config) (*appContext, error) {
 		return nil, err
 	}
 
-	core, err := core.NewFactoryFromConfigWithOptions(client, &generic.FactoryOptions{
+	coreFactory, err := core.NewFactoryFromConfigWithOptions(client, &generic.FactoryOptions{
 		SharedControllerFactory: scf,
 	})
 	if err != nil {
 		return nil, err
 	}
-	corev := core.Core().V1()
 
 	return &appContext{
-		Core: corev,
+		Core: coreFactory.Core().V1(),
 
 		starters: []start.Starter{
-			core,
+			coreFactory,
 		},
 	}, nil
 }

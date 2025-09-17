@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider/server"
-	corecontroller "github.com/rancher/wrangler/pkg/generated/controllers/core/v1"
+	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 )
