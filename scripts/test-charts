@@ -11,8 +11,8 @@ if [[ "${OS}" == "windows" ]]; then
 fi
 
 # Execute in tests/ directory
-pushd tests 1>/dev/null
-trap "popd 1>/dev/null" EXIT
+#pushd tests/charts 1>/dev/null
+#trap "popd 1>/dev/null" EXIT
 
 echo Running chart tests
-go test -count=1 -cover -tags=test ./...
+go test -cover -tags=test $(go list ./... | grep -v tests/integration)

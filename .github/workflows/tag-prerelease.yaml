@@ -13,7 +13,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Read FOSSA token
         uses: rancher-eio/read-vault-secrets@main
         with:
@@ -30,9 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9
         with:
-          version: v1.64.7
+          version: v2.4.0
+          args: --timeout=10m --config=.golangci.json
       - name: go-format
         run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
@@ -41,9 +42,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9
         with:
-          version: v1.64.7
+          args: --timeout=10m --config=.golangci.json
+          version: v2.4.0
       - name: validate-go
         run: ./scripts/validate
       - name: validate-charts

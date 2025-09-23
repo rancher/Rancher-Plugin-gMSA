@@ -13,19 +13,19 @@ jobs:
   go-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9
         with:
-          args: --timeout=10m
-          version: v1.64.7
+          args: --timeout=10m --config=.golangci.json
+          version: v2.4.0
       - name: go-format
         run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
   charts-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: validate-charts
         run: ./scripts/validate-charts
 
@@ -33,7 +33,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: test-go
         run: ./scripts/test
 
@@ -41,15 +41,35 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: test-go
         run: bash ./scripts/test
+
+  integration-tests:
+    needs: [go-validation, charts-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # required for setup-env command
+      # to be resolved in bash scripts
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: './go.mod'
+          cache: 'false'
+      - name: install setup-env
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+      - name: run integration tests
+        env:
+          ENVTEST_K8S_VERSION: 1.33.x
+        run: bash ./tests/integration/run_controller_integration_tests.sh
 
   chart-tests:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: test-charts
         run: ./scripts/test-charts
 
@@ -59,7 +79,7 @@ jobs:
     env:
       CROSS: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build All Binaries
         run: bash ./scripts/build
       - name: Validate CI
@@ -71,7 +91,7 @@ jobs:
     env:
       REPO: ${{ vars.REPO }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build-binaries
         run: bash ./scripts/build
       - name: build-containers
