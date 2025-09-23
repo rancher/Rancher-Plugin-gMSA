@@ -73,11 +73,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      # required for setup-env command
+      # to be resolved in bash scripts
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: './go.mod'
+          cache: 'false'
+      - name: install setup-env
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
       - name: run integration tests
+        env:
+          ENVTEST_K8S_VERSION: 1.33.x
         run: bash ./tests/integration/run_controller_integration_tests.sh
 
   build-all-binaries:
-    needs: [linux-tests, windows-tests, chart-tests]
+    needs: [linux-tests, windows-tests, chart-tests, integration-tests]
     runs-on: windows-2022
     permissions:
       contents: read
