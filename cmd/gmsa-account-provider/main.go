@@ -2,17 +2,17 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	cli "github.com/rancher/Rancher-Plugin-gMSA/cmd/util"
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/provider"
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/utils"
 	"github.com/rancher/Rancher-Plugin-gMSA/pkg/version"
-	command "github.com/rancher/wrangler-cli"
-	"github.com/rancher/wrangler/pkg/kubeconfig"
-	"github.com/rancher/wrangler/pkg/ratelimit"
+	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
+	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 	"github.com/spf13/cobra"
 )
 
 var (
-	debugConfig command.DebugConfig
+	debugConfig cli.DebugConfig
 )
 
 func main() {
@@ -25,19 +25,19 @@ func main() {
 	}
 
 	cmd.AddCommand(
-		command.AddDebug(command.Command(&GMSAAccountProvider{}, cobra.Command{
+		cli.Command(&GMSAAccountProvider{}, cobra.Command{
 			Use:          "run",
 			Short:        "Start the account provider api",
 			SilenceUsage: true,
-		}), &debugConfig),
-		command.AddDebug(command.Command(&GMSAAccountProviderCleanup{}, cobra.Command{
+		}, &debugConfig),
+		cli.Command(&GMSAAccountProviderCleanup{}, cobra.Command{
 			Use:          "cleanup",
 			Short:        "Remove all files and certificates for the account provider instance",
 			SilenceUsage: true,
-		}), &debugConfig),
+		}, &debugConfig),
 	)
 
-	command.Main(cmd)
+	cli.Main(cmd)
 }
 
 type GMSAAccountProvider struct {
