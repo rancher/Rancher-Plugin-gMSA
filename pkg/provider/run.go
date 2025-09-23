@@ -15,20 +15,27 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func Run(ctx context.Context, client *rest.Config, namespace string, disableMTLS, skipArtifacts bool) error {
+type Opts struct {
+	Namespace     string
+	ForcedPort    string
+	DisableMTLS   bool
+	SkipArtifacts bool
+}
+
+func Run(ctx context.Context, client *rest.Config, opts Opts) error {
 	logrus.Infof("Starting controllers")
-	secretCache, err := controllers.Run(ctx, namespace, client)
+	secretCache, err := controllers.Run(ctx, opts.Namespace, client)
 	if err != nil {
 		return err
 	}
-	return run(ctx, secretCache, namespace, disableMTLS, skipArtifacts)
+	return run(ctx, secretCache, opts)
 }
 
-func run(ctx context.Context, secrets getter.Generic[*corev1.Secret], namespace string, disableMTLS, skipArtifacts bool) error {
+func run(ctx context.Context, secrets getter.Generic[*corev1.Secret], opts Opts) error {
 	var tlsCertificates *manager.TLSCertificates
-	if !disableMTLS && !skipArtifacts {
+	if !opts.DisableMTLS && !opts.SkipArtifacts {
 		logrus.Infof("Setting up certificates")
-		m := manager.New(namespace)
+		m := manager.New(opts.Namespace)
 		if err := m.Start(ctx); err != nil {
 			return fmt.Errorf("failed to start certificate manager: %s", err)
 		}
@@ -37,16 +44,17 @@ func run(ctx context.Context, secrets getter.Generic[*corev1.Secret], namespace 
 
 	logrus.Infof("Starting server")
 	server := server.HTTPServer{
-		Handler:      server.NewHandler(getter.Namespaced(secrets, namespace)),
+		Handler:      server.NewHandler(getter.Namespaced(secrets, opts.Namespace)),
 		Certificates: tlsCertificates,
+		ForcePort:    opts.ForcedPort,
 	}
 	if err := server.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start http server: %v", err)
 	}
 
-	if !skipArtifacts {
+	if !opts.SkipArtifacts {
 		// TODO: Adjust Directory Permissions
-		baseDir := filepath.Join(utils.ProviderDirectory, namespace)
+		baseDir := filepath.Join(utils.ProviderDirectory, opts.Namespace)
 		if err := utils.CreateDirectory(baseDir); err != nil {
 			return err
 		}

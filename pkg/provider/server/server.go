@@ -17,6 +17,7 @@ import (
 type HTTPServer struct {
 	Handler      http.Handler
 	Certificates *manager.TLSCertificates
+	ForcePort    string
 
 	lock    sync.RWMutex
 	started bool
@@ -24,9 +25,17 @@ type HTTPServer struct {
 }
 
 func (h *HTTPServer) listen(ctx context.Context) (net.Listener, error) {
-	// use a host allocated port
 	lnConfig := net.ListenConfig{}
-	ln, err := lnConfig.Listen(ctx, "tcp", "localhost:0")
+
+	// use a host allocated port
+	// unless a specific port has
+	// been configured
+	listenAddress := "localhost:0"
+	if h.ForcePort != "" {
+		listenAddress = fmt.Sprintf("localhost:%s", h.ForcePort)
+	}
+
+	ln, err := lnConfig.Listen(ctx, "tcp", listenAddress)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create http listener for http server: %s", err)
 	}

@@ -65,7 +65,12 @@ func (a *GMSAAccountProvider) Run(cmd *cobra.Command, _ []string) error {
 	}
 	client.RateLimiter = ratelimit.None
 
-	if err := provider.Run(cmd.Context(), client, a.Namespace, a.DisableMTLS, a.SkipArtifacts); err != nil {
+	if err = provider.Run(cmd.Context(), client, provider.Opts{
+		Namespace:     a.Namespace,
+		ForcedPort:    "",
+		DisableMTLS:   a.DisableMTLS,
+		SkipArtifacts: a.SkipArtifacts,
+	}); err != nil {
 		return err
 	}
 
