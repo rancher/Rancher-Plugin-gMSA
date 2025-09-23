@@ -44,6 +44,7 @@ type CCGPluginInstaller struct {
 }
 
 func (i *CCGPluginInstaller) Run(_ *cobra.Command, _ []string) error {
+	debugConfig.MustSetupDebug()
 	err := installer.Install()
 	executeTimeout(i.Timeout)
 	return err
@@ -54,6 +55,7 @@ type CCGPluginUninstaller struct {
 }
 
 func (i *CCGPluginUninstaller) Run(_ *cobra.Command, _ []string) error {
+	debugConfig.MustSetupDebug()
 	err := installer.Uninstall()
 	executeTimeout(i.Timeout)
 	return err

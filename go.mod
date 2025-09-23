@@ -2,10 +2,6 @@ module github.com/rancher/Rancher-Plugin-gMSA
 
 go 1.24.1
 
-replace github.com/rancher/wrangler v1.1.1 => github.com/rancher/wrangler v1.1.1-0.20230705223603-201b4da5bdaf
-
-replace github.com/ugorji/go v1.1.4 => github.com/ugorji/go v0.0.0-20181022190402-e5e69e061d4f
-
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-git/go-billy/v5 v5.5.0

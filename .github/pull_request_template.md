@@ -14,7 +14,7 @@
 <!-- Highlight areas or (additional) cases that QA should test w.r.t a fresh install as well as the upgrade scenarios -->
  
 ### Regressions Considerations
-<!-- Dedicated section to specifically call out any areas that with higher chance of regressions caused by this change, include estimation of probability of regressions -->
+<!-- Dedicated section to specifically call out any areas with higher chances of regressions caused by this change, include estimation of probability of regressions -->
 _TODO_
 
 Existing / newly added automated tests that provide evidence there are no regressions:
