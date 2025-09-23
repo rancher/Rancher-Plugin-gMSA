@@ -6,7 +6,7 @@ import (
 	"github.com/rancher/hull/pkg/utils"
 )
 
-var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../index.yaml", "rancher-gmsa-webhook", true)
+var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../../index.yaml", "rancher-gmsa-webhook", true)
 
 var (
 	DefaultReleaseName = "rancher-gmsa-webhook"

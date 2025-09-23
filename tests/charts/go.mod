@@ -1,4 +1,4 @@
-module github.com/aiyengar/Rancher-Plugin-gMSA/tests
+module github.com/rancher/Rancher-Plugin-gMSA/tests
 
 go 1.24
 
