@@ -9,11 +9,11 @@ import (
 	"github.com/rancher/lasso/pkg/cache"
 	"github.com/rancher/lasso/pkg/client"
 	"github.com/rancher/lasso/pkg/controller"
+	"github.com/rancher/lasso/pkg/metrics"
 	"github.com/rancher/wrangler/v3/pkg/generated/controllers/core"
 	corecontroller "github.com/rancher/wrangler/v3/pkg/generated/controllers/core/v1"
 	"github.com/rancher/wrangler/v3/pkg/generic"
 	"github.com/rancher/wrangler/v3/pkg/k8scheck"
-	"github.com/rancher/wrangler/v3/pkg/start"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
@@ -23,11 +23,26 @@ import (
 type appContext struct {
 	Core corecontroller.Interface
 
-	starters []start.Starter
+	ControllerFactory controller.SharedControllerFactory
 }
 
 func (a *appContext) start(ctx context.Context) error {
-	return start.All(ctx, 50, a.starters...)
+	transaction := controller.NewHandlerTransaction(ctx)
+
+	ctx = metrics.WithContextID(ctx, "providercontext")
+	if err := a.ControllerFactory.SharedCacheFactory().Start(ctx); err != nil {
+		transaction.Rollback()
+		return err
+	}
+
+	a.ControllerFactory.SharedCacheFactory().WaitForCacheSync(ctx)
+	transaction.Commit()
+
+	if err := a.ControllerFactory.Start(ctx, 50); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func Run(ctx context.Context, namespace string, client *rest.Config) (corecontroller.SecretCache, error) {
@@ -83,10 +98,7 @@ func newContext(namespace string, client *rest.Config) (*appContext, error) {
 	}
 
 	return &appContext{
-		Core: coreFactory.Core().V1(),
-
-		starters: []start.Starter{
-			coreFactory,
-		},
+		ControllerFactory: scf,
+		Core:              coreFactory.Core().V1(),
 	}, nil
 }
