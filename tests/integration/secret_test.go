@@ -101,7 +101,11 @@ func (p *ProviderSecretControllerTestSuite) TestSecretRetrieval() {
 		p.T().Log(fmt.Sprintf("Server started on port %s", port))
 	}()
 
-	time.Sleep(time.Second * 5)
+	p.T().Log("Waiting for server to start...")
+	require.Eventually(p.T(), func() bool {
+		return p.ping(port)
+	}, time.Second*10, time.Second*2, "Server did not start in expected time")
+	p.T().Log("Server started")
 
 	tests := []struct {
 		name                 string
@@ -220,4 +224,12 @@ func (p *ProviderSecretControllerTestSuite) createSecret(name, namespace string,
 	if err != nil {
 		p.T().Fatal(err)
 	}
+}
+
+func (p *ProviderSecretControllerTestSuite) ping(port string) bool {
+	_, err := http.DefaultClient.Get(fmt.Sprintf("http://127.0.0.1:%s/provider", port))
+	if err != nil {
+		return false
+	}
+	return true
 }
