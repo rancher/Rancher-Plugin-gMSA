@@ -6,12 +6,11 @@ The creation and management of test environments can be automated through the us
 
 # Supported Versions of RKE2
 
-##### _As of September 27th 2023_ the following released RKE2 versions support this feature (by virtue of using containerd 1.7+)
-
-+ `v1.24.14`, `v1.24.15`, `v1.24.16`, `v1.24.17`  
-+ `v1.25.10`, `v1.25.11`, `v1.25.12`, `v1.25.13`, `v1.25.14`, `v1.25.15`  
-+ `v1.26.5`, `v1.26.6`, `v1.26.7`, `v1.26.8`, `v1.26.9`
-+ `v1.27.2`, `v1.27.3`, `v1.27.4`, `v1.27.5`, `v1.27.6`
++ `v1.24.14` and up  
++ `v1.25.10` and up  
++ `v1.26.5` and up
++ `v1.27.2` and up
++ All RKE2 versions `v1.28.0` and up
 
 # Prerequisites 
 

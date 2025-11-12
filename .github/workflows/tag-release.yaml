@@ -13,7 +13,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Read FOSSA token
         uses: rancher-eio/read-vault-secrets@main
         with:
@@ -28,18 +28,19 @@ jobs:
   go-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9
         with:
-          version: v1.64.7
+          args: --timeout=10m --config=.golangci.json
+          version: v2.4.0
       - name: go-format
         run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
   charts-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: validate-charts
         run: ./scripts/validate-charts
 
@@ -47,7 +48,9 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Set Go toolchain
+        run: go env -w GOTOOLCHAIN=go1.25.0+auto # https://github.com/golang/go/issues/75031
       - name: test-go
         run: ./scripts/test
 
@@ -55,7 +58,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: test-go
         run: bash ./scripts/test
 
@@ -63,12 +66,36 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Set Go toolchain
+        run: go env -w GOTOOLCHAIN=go1.25.0+auto # https://github.com/golang/go/issues/75031
       - name: test-charts
         run: ./scripts/test-charts
 
+  integration-tests:
+    needs: [go-validation, charts-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      # required for setup-env command
+      # to be resolved in bash scripts
+      - name: Install Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: './go.mod'
+          cache: 'false'
+      - name: Set Go toolchain
+        run: go env -w GOTOOLCHAIN=go1.25.0+auto # https://github.com/golang/go/issues/75031
+      - name: install setup-env
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+      - name: run integration tests
+        env:
+          ENVTEST_K8S_VERSION: 1.33.x
+        run: bash ./scripts/test-integration
+
   create-release:
-    needs: [linux-tests, windows-tests, chart-tests]
+    needs: [linux-tests, windows-tests, chart-tests, integration-tests, integration-tests]
     runs-on: windows-2022
     env:
       REPO: ${{ vars.REPO }}
@@ -79,7 +106,7 @@ jobs:
       contents: write # required for writing release artifacts
       id-token: write # required for vault integration
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: retrieve dockerhub credentials
         uses: rancher-eio/read-vault-secrets@main
         with:

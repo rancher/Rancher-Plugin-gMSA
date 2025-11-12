@@ -1,27 +1,58 @@
 {
-	"linters": {
-		"disable-all": true,
-		"enable": [
-			"govet",
-			"revive",
-			"goimports",
-			"misspell",
-			"ineffassign",
-			"gofmt"
-		]
-	},
-	"run": {
-		"deadline": "5m"
-	},
-    "issues": {
-        "exclude-rules": [
-            {
-                "linters": "revive",
-                "text": "should have comment or be unexported"
-            }
-        ],
-		"exclude-files": [
-			"/zz_generated_"
-		]
+  "formatters": {
+    "enable": [
+      "gofmt",
+      "goimports"
+    ],
+    "exclusions": {
+      "generated": "lax",
+      "paths": [
+        "/zz_generated_",
+        "third_party$",
+        "builtin$",
+        "examples$",
+        "cmd/util/utils.go"
+      ]
     }
+  },
+  "linters": {
+    "default": "none",
+    "enable": [
+      "govet",
+      "ineffassign",
+      "misspell",
+      "revive"
+    ],
+    "exclusions": {
+      "generated": "lax",
+      "paths": [
+        "/zz_generated_",
+        "third_party$",
+        "builtin$",
+        "examples$",
+        "cmd/util/utils.go"
+      ],
+      "presets": [
+        "comments",
+        "common-false-positives",
+        "legacy",
+        "std-error-handling"
+      ],
+      "rules": [
+        {
+          "linters": [
+            "revive"
+          ],
+          "text": "should have comment or be unexported"
+        },
+        {
+          "linters": [
+            "revive"
+          ],
+          "text": "var-naming: avoid meaningless package names"
+        }
+      ]
+    }
+  },
+  "version": "2"
 }

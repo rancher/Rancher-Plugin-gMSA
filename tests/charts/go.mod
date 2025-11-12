@@ -1,6 +1,6 @@
-module github.com/aiyengar/Rancher-Plugin-gMSA/tests
+module github.com/rancher/Rancher-Plugin-gMSA/tests
 
-go 1.24
+go 1.25.4
 
 require github.com/rancher/hull v0.0.0-20240315173622-6a4f5cdb8d59
 

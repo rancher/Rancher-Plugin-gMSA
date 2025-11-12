@@ -6,7 +6,7 @@ import (
 	"github.com/rancher/hull/pkg/utils"
 )
 
-var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../index.yaml", "rancher-gmsa-plugin-installer", true)
+var ChartPath = utils.MustGetLatestChartVersionPathFromIndex("../../index.yaml", "rancher-gmsa-plugin-installer", true)
 
 var (
 	DefaultReleaseName = "rancher-gmsa-plugin-installer"

@@ -129,7 +129,11 @@ func TestRun(t *testing.T) {
 				err = utils.SetFile(expectedPfxFile, []byte("dummy-content"))
 				assert.Nil(t, err, "expected to be able to create dummy pfx file")
 			}
-			err = run(ctx, &dummySecretGetter{}, defaultNamespace, tc.DisableMTLS, tc.SkipArtifacts)
+			err = run(ctx, &dummySecretGetter{}, Opts{
+				Namespace:     defaultNamespace,
+				DisableMTLS:   tc.DisableMTLS,
+				SkipArtifacts: tc.SkipArtifacts,
+			})
 			if tc.ExpectFailure {
 				assert.NotNil(t, err, "should not have been able to run")
 				paths, err := getPathsWithDirectories(utils.ProviderDirectory)
