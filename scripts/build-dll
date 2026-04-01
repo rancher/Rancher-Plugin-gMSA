@@ -17,8 +17,21 @@ function build-dll() {
     return 0
   fi
 
+  # a windows version (e.g. 2019, 2022) must be provided as the second argument
+  if [ -z "${2}" ]; then
+    echo "error: a Windows version argument (e.g. 2019, 2022) is required"
+    exit 1
+  fi
+
+  DIGEST=$(yq e ".dotnet.${2}.shasum" build.yaml)
+
+  if [ -z "${DIGEST}" ] || [ "${DIGEST}" = "null" ]; then
+    echo "error: no dotnet shasum found in build.yaml for version '${2}'"
+    exit 1
+  fi
+
   # build the DLL in a container so we don't have to install .NET SDK's on the runner
-  docker build --no-cache -f package/ccg-plugin-installer/Dockerfile.builder.windows -t rancher/gmsa-ccg-plugin-builder  .
+  docker build --no-cache --build-arg "DIGEST=${DIGEST}" -f package/ccg-plugin-installer/Dockerfile.builder.windows -t rancher/gmsa-ccg-plugin-builder .
   docker create --name dllbuild rancher/gmsa-ccg-plugin-builder:latest
 
   # cp the resulting artifact into the manager directory so we can embed the file on build
@@ -28,4 +41,4 @@ function build-dll() {
   docker rm dllbuild
 }
 
-build-dll ${OS}
+build-dll ${OS} ${1}

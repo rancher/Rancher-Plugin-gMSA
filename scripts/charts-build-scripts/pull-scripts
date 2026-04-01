@@ -21,15 +21,37 @@ mkdir -p bin
 OS=$(go version | cut -d' ' -f4 | cut -d'/' -f1)
 ARCH=$(go version | cut -d' ' -f4 | cut -d'/' -f2)
 if [[ ${OS} == "linux" ]]; then
-    BINARY_NAME=charts-build-scripts
+    if [[ ${ARCH} == "amd64" ]]; then
+        EXPECTED_SHASUM=${CHARTS_BUILD_SCRIPT_SHASUM_LINUX_AMD}
+    elif [[ ${ARCH} == "arm64" ]]; then
+        EXPECTED_SHASUM=${CHARTS_BUILD_SCRIPT_SHASUM_LINUX_ARM}
+    fi
+    BINARY_NAME=charts-build-scripts_${OS}_${ARCH}
 else
-    BINARY_NAME=charts-build-scripts-${OS}
+    if [[ ${OS} != "darwin" ]]; then
+        echo "Unsupported OS: ${OS}, will build from source"
+        FORCE_BUILD="true"
+    fi
+    if [[ ${ARCH} == "amd64" ]]; then
+        EXPECTED_SHASUM=${CHARTS_BUILD_SCRIPT_SHASUM_DARWIN_AMD}
+    elif [[ ${ARCH} == "arm64" ]]; then
+        EXPECTED_SHASUM=${CHARTS_BUILD_SCRIPT_SHASUM_DARWIN_ARM}
+    fi
+    BINARY_NAME=charts-build-scripts_${OS}_${ARCH}
 fi
-if [[ ${ARCH} == "amd64" ]]; then
-    # skip non-amd64 builds since rancher/charts-build-scripts does not support it yet
-    curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+
+if [[ "${FORCE_BUILD}" != "true" ]]; then
+  echo "downloading build scripts from ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME}"
+  curl -s -L ${CHARTS_BUILD_SCRIPTS_REPO%.git}/releases/download/${CHARTS_BUILD_SCRIPT_VERSION}/${BINARY_NAME} --output bin/charts-build-scripts
+  RECEIVED_SHASUM=$(cat bin/charts-build-scripts | sha256sum | cut -d' ' -f1)
+  if [[ "${RECEIVED_SHASUM}" != "${EXPECTED_SHASUM}" ]]; then
+      echo "Shasum verification failed for downloaded charts-build-scripts binary. Expected ${EXPECTED_SHASUM} but got ${RECEIVED_SHASUM}"
+      rm bin/charts-build-scripts
+      exit 1
+  fi
 fi
-if ! [[ -f bin/charts-build-scripts ]] || [[ "$(cat bin/charts-build-scripts)" == "Not Found" ]]; then
+
+if ! [[ -f bin/charts-build-scripts ]] || [[ "$(cat bin/charts-build-scripts)" == "Not Found" ]] || [[ "$FORCE_BUILD" == "true" ]]; then
     [[ -f bin/charts-build-scripts ]] && rm bin/charts-build-scripts; 
     
     # Fall back to old process
@@ -48,10 +70,12 @@ if ! [[ -f bin/charts-build-scripts ]] || [[ "$(cat bin/charts-build-scripts)" =
     trap 'cleanup' EXIT
     
     [[ -d charts-build-scripts ]] && rm -rf charts-build-scripts
-    git clone --depth 1 --branch $CHARTS_BUILD_SCRIPT_VERSION $CHARTS_BUILD_SCRIPTS_REPO 2>/dev/null
+    echo "cloning $CHARTS_BUILD_SCRIPTS_REPO@$CHARTS_BUILD_SCRIPT_VERSION_COMMIT into ${TEMP_DIR}"
+    git clone --depth 1 --revision $CHARTS_BUILD_SCRIPT_VERSION_COMMIT $CHARTS_BUILD_SCRIPTS_REPO 2>/dev/null
 
     cd charts-build-scripts
-    VERSION_OVERRIDE=${CHARTS_BUILD_SCRIPT_VERSION} ./scripts/build
+    mkdir bin
+    go build -ldflags "-s -w -X main.Version=${CHARTS_BUILD_SCRIPT_VERSION} -X main.GitCommit=${CHARTS_BUILD_SCRIPT_VERSION_COMMIT}" -o bin/charts-build-scripts .
     mv bin/charts-build-scripts ${CURR_DIR}/bin/charts-build-scripts
     
     # Return to original directory

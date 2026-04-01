@@ -22,11 +22,13 @@ for i in "${IMAGES[@]}"; do
 
   if [ "$OS" = "windows" ]; then
       for v in "${NANOSERVER_VERSIONS[@]}"; do
+        # look up the digest for this nanoserver version from build.yaml
+        DIGEST=$(grep -A 5 "^${v}:" build.yaml | grep "shasum:" | head -1 | sed 's/.*shasum:[[:space:]]*//' | tr -d '"')
         # append the nano-server version to the image tag
         IMAGE=${REPO}/"$i":${TAG}-${v}
         (
             set -x
-            docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${v}" -f ${DOCKERFILE} -t ${IMAGE} .
+            docker build --build-arg "ARCH=${ARCH}" --build-arg "OS=${OS}" --build-arg="NANOSERVER_VERSION=${DIGEST}" -f ${DOCKERFILE} -t ${IMAGE} .
         )
         echo Built ${IMAGE} for nanoserver version ${v}
       done

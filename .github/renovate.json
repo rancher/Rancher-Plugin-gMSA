@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "github>rancher/renovate-config#release"
+  ],
+  "baseBranchPatterns": [
+    "main"
+  ],
+  "prHourlyLimit": 2,
+  "reviewers": [
+    "HarrisonWAffel"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^build\\.yaml$"],
+      "matchStrings": [
+        "(?<currentValue>ltsc\\d{4}):\\n\\s+repo: \"(?<depName>[^\"]+)\"\\n\\s+shasum: \"(?<currentDigest>sha256:[a-f0-9]+)\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
