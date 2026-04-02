@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.5.0
 	github.com/rancher/lasso v0.2.3
 	github.com/rancher/wrangler/v3 v3.2.4
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/multierr v1.11.0
