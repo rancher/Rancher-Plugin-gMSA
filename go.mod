@@ -9,7 +9,7 @@ require (
 	github.com/rancher/wrangler/v3 v3.2.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
 	golang.org/x/sys v0.31.0
 	k8s.io/api v0.33.1
