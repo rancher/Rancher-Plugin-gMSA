@@ -54,7 +54,7 @@ jobs:
 
   windows-tests:
     needs: [go-validation, charts-validation]
-    runs-on: windows-2022
+    runs-on: windows-2025
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - name: test-go
@@ -70,7 +70,7 @@ jobs:
 
   build-all-binaries:
     needs: [linux-tests, windows-tests, chart-tests]
-    runs-on: windows-2022
+    runs-on: windows-2025
     permissions:
       contents: read
       id-token: write
