@@ -3,7 +3,7 @@ name: Pull Request CI
 on:
   pull_request:
     paths-ignore:
-      - '*.dapper'
+      - '*.build'
       - '.gitignore'
       - 'CODEOWNERS'
       - 'LICENSE'
