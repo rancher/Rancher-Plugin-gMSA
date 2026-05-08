@@ -1,7 +1,7 @@
-FROM registry.suse.com/bci/golang:1.19-20.21
+FROM registry.suse.com/bci/golang:1.25.9
 
-ARG DAPPER_HOST_ARCH
-ENV ARCH $DAPPER_HOST_ARCH
+ARG ARCH
+ENV ARCH=${ARCH}
 
 RUN zypper -n install git docker vim less file curl wget patch
 RUN if [ "${ARCH}" == "amd64" ]; then \
@@ -15,13 +15,7 @@ ARG yamllint_version=1.26.3
 LABEL yamllint_version=$yamllint_version
 RUN pip install "yamllint==$yamllint_version"
 
-ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
-ENV DAPPER_SOURCE /go/src/github.com/rancher/Rancher-Plugin-gMSA/
-ENV DAPPER_OUTPUT ./bin ./dist
-ENV DAPPER_DOCKER_SOCKET true
-ENV GOPATH /go
-ENV HOME ${DAPPER_SOURCE}
-WORKDIR ${DAPPER_SOURCE}
+WORKDIR /source
 
 ENTRYPOINT ["./scripts/entry"]
 CMD ["ci"]

@@ -1,8 +1,8 @@
 FROM rancher/golang:1.16-windowsservercore
 SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-ARG DAPPER_HOST_ARCH
-ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
+ARG ARCH
+ENV HOST_ARCH=${ARCH} ARCH=${ARCH}
 
 RUN pushd c:\; \
     $URL = 'https://github.com/StefanScherer/docker-cli-builder/releases/download/20.10.21/docker.exe'; \
@@ -31,11 +31,7 @@ RUN pushd c:\; \
     Write-Host 'Complete.'; \
     popd;
 
-ENV DAPPER_ENV REPO TAG DRONE_TAG
-ENV DAPPER_SOURCE /source
-ENV DAPPER_DOCKER_SOCKET true
-ENV HOME ${DAPPER_SOURCE}
+WORKDIR /source
 
-WORKDIR ${DAPPER_SOURCE}
 ENTRYPOINT ["powershell", "-NoLogo", "-NonInteractive", "-File", "./scripts/windows/entry.ps1"]
 CMD ["ci"]
