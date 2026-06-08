@@ -1,6 +1,6 @@
 module github.com/rancher/Rancher-Plugin-gMSA
 
-go 1.24.1
+go 1.25.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/sys v0.31.0
+	golang.org/x/sys v0.45.0
 	k8s.io/api v0.33.1
 	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.1
