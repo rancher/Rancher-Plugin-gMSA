@@ -9,9 +9,9 @@ jobs:
   go-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@ed485de1ff3b974c764ba768d82dda2e035d091e
         with:
           args: --timeout=10m
           version: v1.64.7
@@ -21,7 +21,7 @@ jobs:
   charts-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: validate-charts
         run: ./scripts/validate-charts
 
@@ -32,14 +32,14 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Read FOSSA token
         uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
         with:
           secrets: |
             secret/data/github/org/rancher/fossa/push token | FOSSA_API_KEY_PUSH_ONLY
       - name: FOSSA scan
-        uses: fossas/fossa-action@c414b9ad82eaad041e47a7cf62a4f02411f427a0 # v1.8.0
+        uses: fossas/fossa-action@ff70fe9fe17cbd2040648f1c45e8ec4e4884dcf3 # v1.9.0
         with:
           api-key: ${{ env.FOSSA_API_KEY_PUSH_ONLY }}
           run-tests: false
@@ -48,7 +48,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: test-go
         run: ./scripts/test
 
@@ -56,7 +56,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: test-go
         run: bash ./scripts/test
 
@@ -64,7 +64,7 @@ jobs:
     needs: [go-validation, charts-validation]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: test-charts
         run: ./scripts/test-charts
 
@@ -84,11 +84,11 @@ jobs:
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@3864d6aed8ff134b2ed894ce00c87695c709c870
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: build-binaries
         run: bash ./scripts/build
       - name: package-binaries
