@@ -32,7 +32,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86
         with:
-          version: v1.64.7
+          version: v1.64.8
       - name: go-format
         run: test -z "$(go fmt ./... | tee /dev/stderr)"
 
@@ -43,7 +43,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86
         with:
-          version: v1.64.7
+          version: v1.64.8
       - name: validate-go
         run: ./scripts/validate
       - name: validate-charts
