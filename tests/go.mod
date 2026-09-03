@@ -97,7 +97,7 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rancher/lasso v0.0.0-20220303220127-8cf5555ec03c // indirect
-	github.com/rancher/wrangler v1.0.0 // indirect
+	github.com/rancher/wrangler v1.0.1 // indirect
 	github.com/rubenv/sql-migrate v1.5.2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
