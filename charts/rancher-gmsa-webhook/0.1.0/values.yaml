@@ -37,7 +37,7 @@ global:
     systemDefaultRegistry: ""
   kubectl:
     repository: rancher/kubectl
-    tag: v1.22.6
+    tag: v1.36.2
     pullPolicy: IfNotPresent
 
 affinity: {}
