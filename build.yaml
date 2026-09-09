@@ -3,7 +3,7 @@ ltsc2019:
   shasum: "sha256:ba9ded8c642a453a51795f5f544209359a17d7e70a6130a537cacfa31d64a7f4"
 ltsc2022:
     repo: "mcr.microsoft.com/windows/nanoserver"
-    shasum: "sha256:1a6938f99e552b17fbc942952da9e296e1098fffe23837a18e0aa95b808488ab"
+    shasum: "sha256:87af42244113104b3ce4b5646f9ec1ab6690e6753dd68924e698bdc2132546b3"
 ltsc2025:
     repo: "mcr.microsoft.com/windows/nanoserver"
     shasum: "sha256:9179f234f698371240a29b9b9ace24e89ac4bc73080a75c321fdc5532ca8c1f6"
