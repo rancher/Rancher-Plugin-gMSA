@@ -6,7 +6,7 @@ ltsc2022:
     shasum: "sha256:1a6938f99e552b17fbc942952da9e296e1098fffe23837a18e0aa95b808488ab"
 ltsc2025:
     repo: "mcr.microsoft.com/windows/nanoserver"
-    shasum: "sha256:9179f234f698371240a29b9b9ace24e89ac4bc73080a75c321fdc5532ca8c1f6"
+    shasum: "sha256:4fe6f59e0aadb628a933345eae1f5ab43a2af802969ac0e2ef996c66a3188438"
 dotnet:
   repo: "mcr.microsoft.com/dotnet/framework/sdk"
   2022:
